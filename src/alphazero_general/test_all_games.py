@@ -17,31 +17,26 @@
 
 import unittest
 
-import Arena
-from MCTS import MCTS
+from src.alphazero_general import Arena
+from src.alphazero_general.MCTS import MCTS
 
-from tictactoe.TicTacToeGame import TicTacToeGame
-from tictactoe.TicTacToePlayers import *
-from tictactoe.keras.NNet import NNetWrapper as TicTacToeKerasNNet
+from src.tictactoe.TicTacToeGame import TicTacToeGame
+from src.tictactoe.TicTacToePlayers import *
+from src.tictactoe.keras.NNet import NNetWrapper as TicTacToeKerasNNet
 
-from tictactoe_3d.TicTacToeGame import TicTacToeGame as TicTacToe3DGame
-from tictactoe_3d.TicTacToePlayers import *
-from tictactoe_3d.keras.NNet import NNetWrapper as TicTacToe3DKerasNNet
+from src.tictactoe_3d.TicTacToePlayers import *
 
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as OthelloPytorchNNet
-from othello.tensorflow.NNet import NNetWrapper as OthelloTensorflowNNet
-from othello.keras.NNet import NNetWrapper as OthelloKerasNNet
+from src.othello.OthelloGame import OthelloGame
+from src.othello.pytorch import NNetWrapper as OthelloPytorchNNet
+from src.othello.tensorflow import NNetWrapper as OthelloTensorflowNNet
+from src.othello.keras import NNetWrapper as OthelloKerasNNet
 
-from connect4.Connect4Game import Connect4Game
-from connect4.Connect4Players import *
-from connect4.tensorflow.NNet import NNetWrapper as Connect4TensorflowNNet
+from src.connect4.Connect4Game import Connect4Game
+from src.connect4.tensorflow.NNet import NNetWrapper as Connect4TensorflowNNet
 
-from gobang.GobangGame import GobangGame
-from gobang.GobangPlayers import *
-from gobang.keras.NNet import NNetWrapper as GobangKerasNNet
-from gobang.tensorflow.NNet import NNetWrapper as GobangTensorflowNNet
+from src.gobang.GobangGame import GobangGame
+from src.gobang import NNetWrapper as GobangKerasNNet
+from src.gobang import NNetWrapper as GobangTensorflowNNet
 
 import numpy as np
 from utils import *

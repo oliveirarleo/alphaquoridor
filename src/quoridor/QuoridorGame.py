@@ -1,14 +1,18 @@
 import sys
 
-sys.path.append('..')
-from Game import Game
-from .QuoridorLogic import Board
 import numpy as np
+
+sys.path.append('../..')
+from src.alphazero_general.Game import Game
+from .QuoridorLogic import QuoridorBoard
 
 
 class QuoridorGame(Game):
-    def __init__(self):
+    def __init__(self, n):
         super().__init__()
+        self.n = n
+        self.board_len = 2*self.n-1
+        self.action_size = 12 + 2*(self.n-1)**2
 
     def getInitBoard(self):
         """
@@ -16,22 +20,22 @@ class QuoridorGame(Game):
             startBoard: a representation of the board (ideally this is the form
                         that will be the input to your neural network)
         """
-        return Board().board
+        return QuoridorBoard(self.n).setInitBoard()
 
     def getBoardSize(self):
         """
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return 17, 17
+        return self.board_len, self.board_len
 
     def getActionSize(self):
         """
         Returns:
             actionSize: number of all possible actions
         """
-        # 64 vertical walls, 64 horizontal walls, 4 pawn moves, 12 jumps
-        return 144
+        # 4 pawn moves, 8 jumps, 64 vertical walls, 64 horizontal walls
+        return self.action_size
 
     def getNextState(self, board, player, action):
         """
@@ -44,7 +48,9 @@ class QuoridorGame(Game):
             nextBoard: board after applying action
             nextPlayer: player who plays in the next turn (should be -player)
         """
-        pass
+        quoridor_board = QuoridorBoard(self.n)
+        quoridor_board.setBoard(board)
+        return quoridor_board.executeAction(player, action)
 
     def getValidMoves(self, board, player):
         """
@@ -57,7 +63,7 @@ class QuoridorGame(Game):
                         moves that are valid from the current board and player,
                         0 for invalid moves
         """
-        pass
+        return np.zeros(self.action_size)
 
     def getGameEnded(self, board, player):
         """
@@ -70,11 +76,7 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        if board.red_position[1] == board.board_height:
-            return 1
-        elif board.blue_position[1] == 0:
-            return -1
-        return 0
+        pass
 
     def getCanonicalForm(self, board, player):
         """

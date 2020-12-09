@@ -1,9 +1,8 @@
-import Arena
-from MCTS import MCTS
-from othello.OthelloGame import OthelloGame
-from othello.OthelloPlayers import *
-from othello.pytorch.NNet import NNetWrapper as NNet
-
+from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQuoridorPlayer
+from src.alphazero_general import Arena
+from src.alphazero_general.MCTS import MCTS
+from quoridor.QuoridorGame import QuoridorGame
+from quoridor.pytorch import NNetWrapper as NNet
 
 import numpy as np
 from utils import *
@@ -17,24 +16,22 @@ mini_othello = False  # Play in 6x6 instead of the normal 8x8.
 human_vs_cpu = True
 
 if mini_othello:
-    g = OthelloGame(6)
+    g = QuoridorGame(6)
 else:
-    g = OthelloGame(8)
+    g = QuoridorGame(8)
 
 # all players
 rp = RandomPlayer(g).play
-gp = GreedyOthelloPlayer(g).play
-hp = HumanOthelloPlayer(g).play
-
-
+gp = GreedyQuoridorPlayer(g).play
+hp = HumanQuoridorPlayer(g).play
 
 # nnet players
 n1 = NNet(g)
 if mini_othello:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','6x100x25_best.pth.tar')
+    n1.load_checkpoint('./pretrained_models/othello/pytorch/', '6x100x25_best.pth.tar')
 else:
-    n1.load_checkpoint('./pretrained_models/othello/pytorch/','8x8_100checkpoints_best.pth.tar')
-args1 = dotdict({'numMCTSSims': 50, 'cpuct':1.0})
+    n1.load_checkpoint('./pretrained_models/othello/pytorch/', '8x8_100checkpoints_best.pth.tar')
+args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
 mcts1 = MCTS(g, n1, args1)
 n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
 
@@ -49,6 +46,6 @@ else:
 
     player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
 
-arena = Arena.Arena(n1p, player2, g, display=OthelloGame.display)
+arena = Arena.Arena(n1p, player2, g, display=QuoridorGame.display)
 
 print(arena.playGames(2, verbose=True))
