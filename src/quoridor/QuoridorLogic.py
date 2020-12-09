@@ -97,9 +97,6 @@ class QuoridorBoard:
         else:
             y = int((action-vertical_wall_moves) % (self.n - 1)) * 2 + 1
             x = int((action-vertical_wall_moves) / (self.n - 1)) * 2 + 1
-            print(action-vertical_wall_moves)
-            print(x, y)
-
             self.actions['hw'](self.board, player, x, y)
 
         return self.board

@@ -76,7 +76,11 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        pass
+        if np.sum(board[self.board_len-1, :, 2]) > 0:
+            return player
+        elif np.sum(board[0, :, 3]) > 0:
+            return -player
+        return 0
 
     def getCanonicalForm(self, board, player):
         """
