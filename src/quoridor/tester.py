@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 from quoridor.QuoridorGame import QuoridorGame
@@ -14,7 +16,7 @@ def tostring_board(board):
     return board_string
 
 
-def board_pretty(board):
+def board_pretty(board, invert_yaxis=False):
     """
     Simulator.visualize(path) # plot a path
     Simulator.visualize(path_full, path_short) # plot two paths
@@ -77,7 +79,37 @@ def board_pretty(board):
     ax_map.set_xticks(np.arange(0, 17, 2))
     ax_map.set_xlim([0, 17])
     ax_map.set_ylim([0, 17])
+    if invert_yaxis:
+        ax_map.invert_yaxis()
     plt.show()
+
+
+def printValidActions(valid_actions):
+    n = int(math.sqrt((len(valid_actions)-12)/2))
+
+    print('Valid Moves', len(valid_actions))
+    print()
+
+    pawn_moves = ['mN', 'mS', 'mE', 'mW', 'jN', 'jS', 'jE', 'jW', 'NE', 'NW', 'SE', 'SW']
+    for i, m in enumerate(pawn_moves):
+        print(m, valid_actions[i], end=', ')
+    print('\n')
+
+    # Print vwalls
+    print('Vwalls:')
+    for i in range(n):
+        for j in range(n):
+            print(valid_actions[len(pawn_moves)+(n) * i + j], end=' ')
+        print()
+    print()
+
+    # Print hwalls
+    print('Hwalls:')
+    num_vwalls = len(pawn_moves) + n**2
+    for i in range(n):
+        for j in range(n):
+            print(valid_actions[num_vwalls + n * i + j], end=' ')
+        print()
 
 
 def main():
@@ -103,12 +135,12 @@ def main():
     pawn_moves = 12
     vwx = 4
     vwy = 4
-    print('VW'+str(vwx)+str(vwy))
-    b = quoridor_game.getNextState(b, 1, pawn_moves + vwx*(n-1) + vwy)
+    print('VW' + str(vwx) + str(vwy))
+    b = quoridor_game.getNextState(b, 1, pawn_moves + vwx * (n - 1) + vwy)
 
-    vertical_wall_moves = pawn_moves + (n-1)*(n-1)
+    vertical_wall_moves = pawn_moves + (n - 1) * (n - 1)
     hwx = 3
-    hwy = 5
+    hwy = 3
     print('HW' + str(hwx) + str(hwy))
     b = quoridor_game.getNextState(b, -1, vertical_wall_moves + hwx * 8 + hwy)
 
@@ -121,15 +153,10 @@ def main():
     # b = quoridor_game.getNextState(b, -1, 2)
     # board_pretty(b)
 
-    valid_moves = quoridor_game.getValidMoves(b, 1)
-    print('Valid Moves', len(valid_moves))
-    moves = ['mN', 'mS', 'mE', 'mW', 'jN', 'jS', 'jE', 'jW', 'NE', 'NW', 'SE', 'SW']
-    # print(moves)
-    # print(valid_moves)
-    for i, m in enumerate(moves):
-        print(m, valid_moves[i])
+    valid_moves = quoridor_game.getValidMoves(b, -1)
+    printValidActions(valid_moves)
+    board_pretty(b, True)
 
-    board_pretty(b)
 
 if __name__ == "__main__":
     main()

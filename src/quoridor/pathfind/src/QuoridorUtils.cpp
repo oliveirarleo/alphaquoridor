@@ -259,29 +259,32 @@ inline std::tuple<std::vector<std::vector<int>>, std::vector<int>> FindPathAll(
     return {path_all, steps_all};
 }
 
-int countWalls(std::vector<std::vector<int>> &board) {
-    int num_walls = 0;
-    int board_size = (int) board.size();
-    for (int i = 0; i < board_size; i += 2) {
-        for (int j = 1; j < board_size; j += 2) {
-            if (board[i][j] == 1) {
-                num_walls += 1;
-            }
+void printBoard(const std::vector<std::vector<int>> &board) {
+    for (const auto &line : board) {
+        for (const auto &e : line) {
+            std::cout << e;
         }
-
+        std::cout << '\n';
     }
-    for (int i = 1; i < board_size; i += 2) {
-        for (int j = 0; j < board_size; j++) {
-            if (board[i][j] == 1) {
-                num_walls += 1;
-            }
-        }
-    }
+    std::cout << '\n';
 
-    return num_walls / 3;
 }
 
-void findPlayerPosition(std::vector<std::vector<int>> &board, int &x, int &y) {
+int countWalls(const std::vector<std::vector<int>> &walls) {
+
+    int num_walls = 0;
+    int board_size = (int) walls.size();
+    for (int i = 1; i < board_size; i += 2) {
+        for (int j = 1; j < board_size; j += 2) {
+            num_walls += walls[i][j];
+        }
+    }
+    return num_walls;
+}
+
+void findPlayerPosition(const std::vector<std::vector<int>> &board, int &x, int &y) {
+
+
     int board_size = (int) board.size();
     for (int i = 0; i < board_size; i += 2) {
         for (int j = 0; j < board_size; j += 2) {
@@ -321,26 +324,173 @@ void joinWalls(const std::vector<std::vector<int>> &red_walls, const std::vector
 
 }
 
+void getPawnActions(int player_x, int player_y, const std::vector<std::vector<int>> &walls,
+                    const std::vector<std::vector<int>> &opponent_board, std::vector<int> &actions) {
+    int board_size = (int) walls.size();
+    //    NORTH
+    //    Is there a wall blocking or is he in the edge?
+    if ((player_y + 2 < board_size) && walls[player_y + 1][player_x] == 0) {
+        // Is there a player on the north position?
+        if (opponent_board[player_y + 2][player_x] == 1) {
+            // JNE
+            // Is there a wall on north of the opponent player or is he on the edge of the board?
+            if (((player_y + 3 >= board_size) || walls[player_y + 3][player_x] == 1)) {
+                // Is there a wall on the east of opponent?
+                if ((player_x + 1 < board_size) && (walls[player_y + 2][player_x + 1] == 0)) {
+                    // Jump NORTHEAST
+                    actions[8] = 1;
+                }
+                // Is there a wall on the west of opponent?
+                if ((player_x - 1 >= 0) && (walls[player_y + 2][player_x - 1] == 0)) {
+                    // Jump NORTHWEST
+                    actions[9] = 1;
+                }
+            }
+                // JN
+                // If there is a square and there is no player there
+            else if ((player_y + 4 < board_size) && opponent_board[player_y + 4][player_x] != 1) {
+                // Jump NORTH
+                actions[4] = 1;
+            }
+        } else {
+            // Move NORTH
+            actions[0] = 1;
+        }
+    }
+
+    //    SOUTH
+    //    Is there a wall blocking or is he in the edge?
+    if ((player_y - 2 >= 0) && walls[player_y - 1][player_x] == 0) {
+        // Is there a player on the south position?
+        if (opponent_board[player_y - 2][player_x] == 1) {
+            // JSE
+            // Is there a wall on south of the opponent player or is he on the edge of the board?
+            if (((player_y - 3 < 0) || walls[player_y - 3][player_x] == 1)) {
+                // Is there a wall on the east of opponent?
+                if ((player_x + 1 < board_size) && (walls[player_y - 2][player_x + 1] == 0)) {
+                    // Jump SOUTHEAST
+                    actions[10] = 1;
+                }
+                // Is there a wall on the west of opponent?
+                if ((player_x - 1 >= 0) && (walls[player_y - 2][player_x - 1] == 0)) {
+                    // Jump SOUTHWEST
+                    actions[11] = 1;
+                }
+            }
+                // JS
+                // If there is a square and there is no player there
+            else if ((player_y - 4 > 0) && opponent_board[player_y - 4][player_x] != 1) {
+                // Jump SOUTH
+                actions[5] = 1;
+            }
+        } else {
+            // Move SOUTH
+            actions[1] = 1;
+        }
+    }
+
+
+    //    EAST
+    //    Is there a wall blocking or is he in the edge?
+    if ((player_x + 2 < board_size) && walls[player_y][player_x + 1] == 0) {
+        // Is there a player on the east position?
+        if (opponent_board[player_y][player_x + 2] == 1) {
+            // JEN
+            // Is there a wall on east of the opponent player or is he on the edge of the board?
+            if (((player_x + 3 >= board_size) || walls[player_y][player_x + 3] == 1)) {
+                // Is there a wall on the north of opponent?
+                if ((player_y + 1 < board_size) && (walls[player_y + 1][player_x + 2] == 0)) {
+                    // Jump NORTHEAST
+                    actions[8] = 1;
+                }
+                // Is there a wall on the south of opponent?
+                if ((player_y - 1 >= 0) && (walls[player_y - 1][player_x + 2] == 0)) {
+                    // Jump SOUTHEAST
+                    actions[10] = 1;
+                }
+            }
+                // JE
+                // If there is a square and there is no player there
+            else if ((player_x + 4 < board_size) && opponent_board[player_y][player_x + 4] != 1) {
+                // Jump EAST
+                actions[6] = 1;
+            }
+        } else {
+            // Move EAST
+            actions[2] = 1;
+        }
+    }
+
+
+    //    WEST
+    //    Is there a wall blocking or is he in the edge?
+    if ((player_x - 2 >= 0) && walls[player_y][player_x - 1] == 0) {
+        // Is there a player on the east position?
+        if (opponent_board[player_y][player_x - 2] == 1) {
+            // JEN
+            // Is there a wall on east of the opponent player or is he on the edge of the board?
+            if (((player_x - 3 < 0) || walls[player_y][player_x - 3] == 1)) {
+                // Is there a wall on the north of opponent?
+                if ((player_y + 1 < board_size) && (walls[player_y + 1][player_x - 2] == 0)) {
+                    // Jump NORTHWEST
+                    actions[9] = 1;
+                }
+                // Is there a wall on the south of opponent?
+                if ((player_y - 1 >= 0) && (walls[player_y - 1][player_x - 2] == 0)) {
+                    // Jump SOUTHWEST
+                    actions[11] = 1;
+                }
+            }
+                // JW
+                // If there is a square and there is no player there
+            else if ((player_y - 4 >= 0) && opponent_board[player_y][player_x - 4] != 1) {
+                // Jump WEST
+                actions[7] = 1;
+            }
+        } else {
+            // Move WEST
+            actions[3] = 1;
+        }
+    }
+}
+
+void getWallActions(const std::vector<std::vector<int>> &walls, int player_x, int player_y, int opponent_x,
+                    int opponent_y, int player_num_walls_placed, std::vector<int> &actions) {
+    if (player_num_walls_placed >= 10)
+        return;
+    int board_size = (int) walls.size();
+    int n = (board_size + 1) / 2 - 1;
+    int pawn_actions = 12;
+    int vwall_actions = pawn_actions + n * n;
+    for (int i = 1; i < board_size; i += 2) {
+        for (int j = 1; j < board_size; j += 2) {
+            if (walls[i][j] == 0) {
+                // Check vwall
+                if ((walls[i + 1][j] == 0) && (walls[i - 1][j] == 0)) {
+                    actions[pawn_actions + i / 2 * n + j / 2] = 1;
+                }
+                // Check hwall
+                if ((walls[i][j + 1] == 0) && (walls[i][j - 1] == 0)) {
+
+                    actions[vwall_actions + i/2 * n + j/2] = 1;
+                }
+            }
+
+        }
+    }
+
+}
+
 
 inline std::vector<int> GetValidMoves(
         std::vector<std::vector<std::vector<int>>> &board,
         int player) {
 
-    int board_size = board[0].size();
-    int n = ((int) board_size + 1) / 2;
+    int board_size = (int) board[0].size();
+    int n = (board_size + 1) / 2;
     int action_size = 12 + 2 * ((n - 1) * (n - 1));
     std::vector<int> actions(action_size, 0);
 
-//    for (const auto& boardtype : board) {
-//        for (const auto& line : boardtype) {
-//            for (const auto& e : line) {
-//                std::cout << e;
-//            }
-//            std::cout << '\n';
-//        }
-//
-//        std::cout << '\n';
-//    }
 
     const int RED_POS = 2;
     const int RED_WALLS = 0;
@@ -359,10 +509,6 @@ inline std::vector<int> GetValidMoves(
         player_walls = BLUE_WALLS;
     }
 
-//    Finding player position
-    int player_x = 0;
-    int player_y = 0;
-    findPlayerPosition(board[player_pos], player_x, player_y);
 
 //    Unifying walls
     std::vector<std::vector<int>> walls(board_size);
@@ -370,136 +516,19 @@ inline std::vector<int> GetValidMoves(
         walls[i].resize(board_size);
 
     joinWalls(board[RED_WALLS], board[BLUE_WALLS], walls);
-    std::cout << "Walls: " << countWalls(walls) << '\n';
 
-    //    NORTH
-    //    Is there a wall blocking or is he in the edge?
-    if ((player_y + 2 < board_size) && walls[player_y + 1][player_x] == 0) {
-        // Is there a player on the north position?
-        if (board[opponent_pos][player_y + 2][player_x] == 1) {
-            // JNE
-            // Is there a wall on north of the opponent player or is he on the edge of the board?
-            if (((player_y + 3 >= board_size) || walls[player_y + 3][player_x] == 1)) {
-                // Is there a wall on the east of opponent?
-                if ((player_x + 1 < board_size) && (walls[player_y + 2][player_x + 1] == 0)) {
-                    // Jump NORTHEAST
-                    actions[8] = 1;
-                }
-                // Is there a wall on the west of opponent?
-                if ((player_x - 1 >= 0) && (walls[player_y + 2][player_x - 1] == 0)) {
-                    // Jump NORTHWEST
-                    actions[9] = 1;
-                }
-            }
-                // JN
-                // If there is a square and there is no player there
-            else if ((player_y + 4 < board_size) && board[opponent_pos][player_y + 4][player_x] != 1) {
-                // Jump NORTH
-                actions[4] = 1;
-            }
-        } else {
-            // Move NORTH
-            actions[0] = 1;
-        }
-    }
+//    Get Pawn actions
+    int player_x = 0;
+    int player_y = 0;
+    int opponent_x = 0;
+    int opponent_y = 0;
+    findPlayerPosition(board[player_pos], player_x, player_y);
+    findPlayerPosition(board[opponent_pos], opponent_x, opponent_y);
+    getPawnActions(player_x, player_y, walls, board[opponent_pos], actions);
 
-    //    SOUTH
-    //    Is there a wall blocking or is he in the edge?
-    if ((player_y - 2 >= 0) && walls[player_y - 1][player_x] == 0) {
-        // Is there a player on the south position?
-        if (board[opponent_pos][player_y - 2][player_x] == 1) {
-            // JSE
-            // Is there a wall on south of the opponent player or is he on the edge of the board?
-            if (((player_y - 3 < 0) || walls[player_y - 3][player_x] == 1)) {
-                // Is there a wall on the east of opponent?
-                if ((player_x + 1 < board_size) && (walls[player_y - 2][player_x + 1] == 0)) {
-                    // Jump SOUTHEAST
-                    actions[10] = 1;
-                }
-                // Is there a wall on the west of opponent?
-                if ((player_x - 1 >= 0) && (walls[player_y - 2][player_x - 1] == 0)) {
-                    // Jump SOUTHWEST
-                    actions[11] = 1;
-                }
-            }
-                // JS
-                // If there is a square and there is no player there
-            else if ((player_y - 4 > 0) && board[opponent_pos][player_y - 4][player_x] != 1) {
-                // Jump SOUTH
-                actions[5] = 1;
-            }
-        } else {
-            // Move SOUTH
-            actions[1] = 1;
-        }
-    }
-
-
-    //    EAST
-    //    Is there a wall blocking or is he in the edge?
-    if ((player_x + 2 < board_size) && walls[player_y][player_x + 1] == 0) {
-        // Is there a player on the east position?
-        if (board[opponent_pos][player_y][player_x + 2] == 1) {
-            // JEN
-            // Is there a wall on east of the opponent player or is he on the edge of the board?
-            if (((player_x + 3 >= board_size) || walls[player_y][player_x + 3] == 1)) {
-                // Is there a wall on the north of opponent?
-                if ((player_y + 1 < board_size) && (walls[player_y + 1][player_x + 2] == 0)) {
-                    // Jump NORTHEAST
-                    actions[8] = 1;
-                }
-                // Is there a wall on the south of opponent?
-                if ((player_y - 1 >= 0) && (walls[player_y - 1][player_x + 2] == 0)) {
-                    // Jump SOUTHEAST
-                    actions[10] = 1;
-                }
-            }
-                // JE
-                // If there is a square and there is no player there
-            else if ((player_x + 4 < board_size) && board[opponent_pos][player_y][player_x + 4] != 1) {
-                // Jump EAST
-                actions[6] = 1;
-            }
-        } else {
-            // Move EAST
-            actions[2] = 1;
-        }
-    }
-
-
-    //    WEST
-    //    Is there a wall blocking or is he in the edge?
-    if ((player_x - 2 >= 0) && walls[player_y][player_x - 1] == 0) {
-        // Is there a player on the east position?
-        if (board[opponent_pos][player_y][player_x - 2] == 1) {
-            // JEN
-            // Is there a wall on east of the opponent player or is he on the edge of the board?
-            if (((player_x - 3 < 0) || walls[player_y][player_x - 3] == 1)) {
-                // Is there a wall on the north of opponent?
-                if ((player_y + 1 < board_size) && (walls[player_y + 1][player_x - 2] == 0)) {
-                    // Jump NORTHWEST
-                    actions[9] = 1;
-                }
-                // Is there a wall on the south of opponent?
-                if ((player_y - 1 >= 0) && (walls[player_y - 1][player_x - 2] == 0)) {
-                    // Jump SOUTHWEST
-                    actions[11] = 1;
-                }
-            }
-                // JW
-                // If there is a square and there is no player there
-            else if ((player_y - 4 >= 0) && board[opponent_pos][player_y][player_x - 4] != 1) {
-                // Jump WEST
-                actions[7] = 1;
-            }
-        } else {
-            // Move WEST
-            actions[3] = 1;
-        }
-    }
-
-    std::cout << player_x << ' ' << player_y << ' ' << countWalls(board[player_walls]) << '\n';
-
+//    Get Wall actions
+    int player_num_walls_placed = countWalls(board[player_walls]);
+    getWallActions(walls, player_x, player_y, opponent_x, opponent_y, player_num_walls_placed, actions);
 
     return actions;
 }
