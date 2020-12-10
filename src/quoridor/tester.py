@@ -99,21 +99,9 @@ class QuoridorEngineTester:
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
-        # for i, p in enumerate(points):
-        #     if i == 0:
-        #         rect = patches.Rectangle(p, 1, 1,
-        #                                  linewidth=1, facecolor='r')
-        #     elif i == len(points) - 1:
-        #         rect = patches.Rectangle(p, 1, 1,
-        #                                  linewidth=1, facecolor='g')
-        #     else:
-        #         rect = patches.Rectangle(p, 1, 1,
-        #                                  linewidth=1, facecolor='b')
-        #     ax_map.add_patch(rect)
-
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):
-            if i != 0 and i != len(path):
+            if i != 0 and i != len(points) - 1:
                 # Create a Rectangle patch
                 rect = patches.Rectangle(p, 1, 1,
                                          linewidth=1, facecolor='g')
@@ -207,7 +195,6 @@ class QuoridorEngineTester:
 
         start = [pos[1][0], pos[0][0]]
 
-
         print('pos', start)
         print('goal', end)
 
@@ -218,10 +205,10 @@ class QuoridorEngineTester:
 
 
 def main():
-    tester = QuoridorEngineTester(5)
+    tester = QuoridorEngineTester(9)
     # tester.printValidActions(1)
     player = 1
-    for _ in range(20):
+    for _ in range(40):
         valid_actions = tester.getValidActions(player)
         if sum(valid_actions) == 0:
             break
@@ -233,8 +220,8 @@ def main():
         tester.executeAction(action, player)
         player = - player
 
-    tester.board_pretty(True)
-    # tester.printPath(1)
+    # tester.board_pretty(True)
+    tester.printPath(-1)
     # print(tester.board_to_string())
 
 
