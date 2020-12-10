@@ -8,154 +8,146 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
 
-def tostring_board(board):
-    walls = board[:, :, 0] + board[:, :, 1] + 2 * board[:, :, 2] + 3 * board[:, :, 3]
-    board_string = 'board:' + str(walls.shape) + '\n'
-    for line in walls:
-        board_string += str(line) + '\n'
-    return board_string
+class QuoridorEngineTester:
+    def __init__(self, n):
+        self.n = n
+        self.n_walls = n - 1
 
+        self.game = QuoridorGame(self.n)
+        self.init_board = self.game.getInitBoard()
+        self.board = self.init_board
 
-def board_pretty(board, invert_yaxis=False):
-    """
-    Simulator.visualize(path) # plot a path
-    Simulator.visualize(path_full, path_short) # plot two paths
+        self.pawn_actions = 12
+        self.vwall_actions = self.pawn_actions + self.n_walls * self.n_walls
 
-    path is a list for the trajectory. [x[0], y[0], x[1], y[1], ...]
-    """
+        self.pawn_action_translator = {
+            'N': 0,
+            'S': 1,
+            'E': 2,
+            'W': 3,
+            'JN': 4,
+            'JS': 5,
+            'JE': 6,
+            'JW': 7,
+            'JNE': 8,
+            'JNW': 9,
+            'JSE': 10,
+            'JSW': 11,
+        }
 
-    fig_map, ax_map = plt.subplots(1, 1)
+    def board_to_string(self):
+        walls = self.board[:, :, 0] + self.board[:, :, 1] + 2 * self.board[:, :, 2] + 3 * self.board[:, :, 3]
+        board_string = 'board:' + str(walls.shape) + '\n'
+        for line in walls:
+            board_string += str(line) + '\n'
+        return board_string
 
-    # plot retangle obstacles
-    for idx, x in np.ndenumerate(board[0, :, :]):
-        idx = (idx[1], idx[0])
-        if idx[0] % 2 == 1 or idx[1] % 2 == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='lightgray')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='darkred')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
+    def board_pretty(self, invert_yaxis=False):
+        """
+        Simulator.visualize(path) # plot a path
+        Simulator.visualize(path_full, path_short) # plot two paths
 
-    for idx, x in np.ndenumerate(board[1, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='darkblue')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
+        path is a list for the trajectory. [x[0], y[0], x[1], y[1], ...]
+        """
 
-    for idx, x in np.ndenumerate(board[2, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='r')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
+        fig_map, ax_map = plt.subplots(1, 1)
 
-    for idx, x in np.ndenumerate(board[3, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='b')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
+        # plot retangle obstacles
+        for idx, x in np.ndenumerate(self.board[0, :, :]):
+            idx = (idx[1], idx[0])
+            if idx[0] % 2 == 1 or idx[1] % 2 == 1:
+                # Create a Rectangle patch
+                rect = patches.Rectangle(idx, 1, 1,
+                                         linewidth=1, facecolor='lightgray')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
+            if x == 1:
+                # Create a Rectangle patch
+                rect = patches.Rectangle(idx, 1, 1,
+                                         linewidth=1, facecolor='darkred')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
 
-    # if len(arguments) == 2:
-    #     ax_map.plot(arguments[1][0::2], arguments[1][1::2], label="short path")
-    # ax_map.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    ax_map.set_aspect('equal')
-    ax_map.set_yticks(np.arange(0, 17, 2))
-    ax_map.set_xticks(np.arange(0, 17, 2))
-    ax_map.set_xlim([0, 17])
-    ax_map.set_ylim([0, 17])
-    if invert_yaxis:
-        ax_map.invert_yaxis()
-    plt.show()
+        for idx, x in np.ndenumerate(self.board[1, :, :]):
+            idx = (idx[1], idx[0])
+            if x == 1:
+                # Create a Rectangle patch
+                rect = patches.Rectangle(idx, 1, 1,
+                                         linewidth=1, facecolor='darkblue')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
 
+        for idx, x in np.ndenumerate(self.board[2, :, :]):
+            idx = (idx[1], idx[0])
+            if x == 1:
+                # Create a Rectangle patch
+                rect = patches.Rectangle(idx, 1, 1,
+                                         linewidth=1, facecolor='r')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
 
-def printValidActions(valid_actions):
-    n = int(math.sqrt((len(valid_actions)-12)/2))
+        for idx, x in np.ndenumerate(self.board[3, :, :]):
+            idx = (idx[1], idx[0])
+            if x == 1:
+                # Create a Rectangle patch
+                rect = patches.Rectangle(idx, 1, 1,
+                                         linewidth=1, facecolor='b')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
 
-    print('Valid Moves', len(valid_actions))
-    print()
+        ax_map.set_aspect('equal')
+        ax_map.set_yticks(np.arange(0, 17, 2))
+        ax_map.set_xticks(np.arange(0, 17, 2))
+        ax_map.set_xlim([0, 17])
+        ax_map.set_ylim([0, 17])
+        if invert_yaxis:
+            ax_map.invert_yaxis()
+        plt.show()
 
-    pawn_moves = ['mN', 'mS', 'mE', 'mW', 'jN', 'jS', 'jE', 'jW', 'NE', 'NW', 'SE', 'SW']
-    for i, m in enumerate(pawn_moves):
-        print(m, valid_actions[i], end=', ')
-    print('\n')
+    def placeWall(self, player, x, y, is_vertical):
+        if is_vertical:
+            print('VW' + str(x) + ' ' + str(y))
+            self.board = self.game.getNextState(self.board, player, self.pawn_actions + x * self.n_walls + y)
 
-    # Print vwalls
-    print('Vwalls:')
-    for i in range(n):
-        for j in range(n):
-            print(valid_actions[len(pawn_moves)+(n) * i + j], end=' ')
+        else:
+            print('HW' + str(x) + ' ' + str(y))
+            self.board = self.game.getNextState(self.board, player, self.vwall_actions + x * self.n_walls + y)
+
+    def move(self, player, direction):
+        self.board = self.game.getNextState(self.board, player, self.pawn_action_translator[direction])
+
+    def printValidActions(self, player):
+        valid_actions = self.game.getValidMoves(self.board, player)
+
+        print('Valid Moves', sum(valid_actions) ,'/', len(valid_actions))
+
+        pawn_moves = self.pawn_action_translator.keys()
+        for i, m in enumerate(pawn_moves):
+            print(m, valid_actions[i], end=', ')
         print()
-    print()
 
-    # Print hwalls
-    print('Hwalls:')
-    num_vwalls = len(pawn_moves) + n**2
-    for i in range(n):
-        for j in range(n):
-            print(valid_actions[num_vwalls + n * i + j], end=' ')
-        print()
+        # Print vwalls
+        print('Vwalls:')
+        for i in range(self.n_walls):
+            for j in range(self.n_walls):
+                print(valid_actions[len(pawn_moves) + self.n_walls * i + j], end=' ')
+            print()
+
+        # Print hwalls
+        print('Hwalls:')
+        num_vwalls = len(pawn_moves) + self.n_walls ** 2
+        for i in range(self.n_walls):
+            for j in range(self.n_walls):
+                print(valid_actions[num_vwalls + self.n_walls * i + j], end=' ')
+            print()
 
 
 def main():
-    n = 9
+    tester = QuoridorEngineTester(9)
+    tester.printValidActions(1)
 
-    quoridor_game = QuoridorGame(n)
-    init_board = quoridor_game.getInitBoard()
-
-    # print('Init Board', tostring_board(init_board))
-    print('Board Size', quoridor_game.getBoardSize())
-    print('Action Size', quoridor_game.getActionSize())
-
-    # TEST GET GAME ENDED
-    b = init_board
-    for _ in range(3):
-        b = quoridor_game.getNextState(b, 1, 0)
-        b = quoridor_game.getNextState(b, -1, 1)
-
-    b = quoridor_game.getNextState(b, 1, 0)
-    print('Red won?', quoridor_game.getGameEnded(b, 1))
-
-    # TEST PLACING WALLS
-    pawn_moves = 12
-    vwx = 4
-    vwy = 4
-    print('VW' + str(vwx) + str(vwy))
-    b = quoridor_game.getNextState(b, 1, pawn_moves + vwx * (n - 1) + vwy)
-
-    vertical_wall_moves = pawn_moves + (n - 1) * (n - 1)
-    hwx = 3
-    hwy = 3
-    print('HW' + str(hwx) + str(hwy))
-    b = quoridor_game.getNextState(b, -1, vertical_wall_moves + hwx * 8 + hwy)
-
-    # TEST MOVING
-    # print('Red N')
-    # b = quoridor_game.getNextState(b, 1, 0)
-    # print('Blue S')
-    # b = quoridor_game.getNextState(b, -1, 1)
-    # print('Blue E')
-    # b = quoridor_game.getNextState(b, -1, 2)
-    # board_pretty(b)
-
-    valid_moves = quoridor_game.getValidMoves(b, -1)
-    printValidActions(valid_moves)
-    board_pretty(b, True)
 
 
 if __name__ == "__main__":
