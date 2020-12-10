@@ -35,4 +35,4 @@ file(GLOB HEADER_FILES include/*.h)
 
 
 # Build c++ library such that python can call it
-pybind11_add_module(QuoridorAStarPython src/QuoridorAStarPython.cpp)
+pybind11_add_module(QuoridorUtils src/QuoridorUtils.cpp)

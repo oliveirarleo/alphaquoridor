@@ -26,22 +26,22 @@ class QuoridorBoard:
             2: partial(self.move, dx=+2, dy=+0),
             # WEST
             3: partial(self.move, dx=-2, dy=+0),
-            # JUMP NORTH
+            # JN
             4: partial(self.move, dx=+0, dy=+4),
-            # JUMP SOUTH
+            # JS
             5: partial(self.move, dx=+0, dy=-4),
-            # JUMP EAST
+            # JE
             6: partial(self.move, dx=+4, dy=+0),
-            # JUMP WEST
+            # JW
             7: partial(self.move, dx=-4, dy=+0),
-            # JUMP NW
-            8: partial(self.move, dx=+2, dy=+2),
-            # JUMP NE
-            9: partial(self.move, dx=-2, dy=+2),
-            # JUMP SW
-            10: partial(self.move, dx=+2, dy=-2),
-            # JUMP SE
-            11: partial(self.move, dx=-2, dy=-2),
+            # JNE
+            8: partial(self.move, dx=-2, dy=+2),
+            # JNW
+            9: partial(self.move, dx=+2, dy=+2),
+            # JSE
+            10: partial(self.move, dx=-2, dy=-2),
+            # JSW
+            11: partial(self.move, dx=+2, dy=-2),
             # PLACE VERTICAL WALL
             'vw': self.placeVerticalWall,
             # PLACE HORIZONTAL WALL

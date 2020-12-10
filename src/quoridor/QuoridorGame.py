@@ -6,7 +6,7 @@ import numpy as np
 sys.path.append('../..')
 sys.path.append(os.getcwd() + '/pathfind/build')
 sys.path.append(os.getcwd() + '/src')
-import QuoridorAStarPython
+import QuoridorUtils
 from src.alphazero_general.Game import Game
 from .QuoridorLogic import QuoridorBoard
 
@@ -67,7 +67,7 @@ class QuoridorGame(Game):
                         moves that are valid from the current board and player,
                         0 for invalid moves
         """
-        return QuoridorAStarPython.GetValidMoves(board, player)
+        return QuoridorUtils.GetValidMoves(board, player)
 
     def getGameEnded(self, board, player):
         """
@@ -80,9 +80,9 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        if np.sum(board[self.board_len - 1, :, 2]) > 0:
+        if np.sum(board[2, self.board_len - 1, :]) > 0:
             return player
-        elif np.sum(board[0, :, 3]) > 0:
+        elif np.sum(board[3, 0, :]) > 0:
             return -player
         return 0
 

@@ -91,43 +91,45 @@ def main():
     print('Action Size', quoridor_game.getActionSize())
 
     # TEST GET GAME ENDED
-    # b = init_board
-    # for _ in range(n-1):
-    #     b = quoridor_game.getNextState(b, 1, 0)
-    #     b = quoridor_game.getNextState(b, -1, 1)
-    #     print('Red UP')
-    # b = quoridor_game.getNextState(b, 1, 2)
-    # b = quoridor_game.getNextState(b, 1, 1)
-    # b = quoridor_game.getNextState(b, -1, 0)
-    # board_pretty(b)
-    # print('Red won?', quoridor_game.getGameEnded(b, 1))
+    b = init_board
+    for _ in range(3):
+        b = quoridor_game.getNextState(b, 1, 0)
+        b = quoridor_game.getNextState(b, -1, 1)
+
+    b = quoridor_game.getNextState(b, 1, 0)
+    print('Red won?', quoridor_game.getGameEnded(b, 1))
 
     # TEST PLACING WALLS
     pawn_moves = 12
-    vwx = 2
-    vwy = 0
+    vwx = 4
+    vwy = 4
     print('VW'+str(vwx)+str(vwy))
-    b = quoridor_game.getNextState(init_board, 1, pawn_moves + vwx*(n-1) + vwy)
+    b = quoridor_game.getNextState(b, 1, pawn_moves + vwx*(n-1) + vwy)
 
     vertical_wall_moves = pawn_moves + (n-1)*(n-1)
-    hwx = 1
-    hwy = 2
+    hwx = 3
+    hwy = 5
     print('HW' + str(hwx) + str(hwy))
     b = quoridor_game.getNextState(b, -1, vertical_wall_moves + hwx * 8 + hwy)
 
     # TEST MOVING
-    print('Red N')
-    b = quoridor_game.getNextState(b, 1, 0)
-    print('Blue S')
-    b = quoridor_game.getNextState(b, -1, 1)
-    print('Blue E')
-    b = quoridor_game.getNextState(b, -1, 2)
-    board_pretty(b)
+    # print('Red N')
+    # b = quoridor_game.getNextState(b, 1, 0)
+    # print('Blue S')
+    # b = quoridor_game.getNextState(b, -1, 1)
+    # print('Blue E')
+    # b = quoridor_game.getNextState(b, -1, 2)
+    # board_pretty(b)
 
     valid_moves = quoridor_game.getValidMoves(b, 1)
     print('Valid Moves', len(valid_moves))
-    print('Valid Moves', valid_moves)
+    moves = ['mN', 'mS', 'mE', 'mW', 'jN', 'jS', 'jE', 'jW', 'NE', 'NW', 'SE', 'SW']
+    # print(moves)
+    # print(valid_moves)
+    for i, m in enumerate(moves):
+        print(m, valid_moves[i])
 
+    board_pretty(b)
 
 if __name__ == "__main__":
     main()
