@@ -36,7 +36,7 @@ class QuoridorEngineTester:
         }
 
     def board_to_string(self):
-        walls = self.board[:, :, 0] + self.board[:, :, 1] + 2 * self.board[:, :, 2] + 3 * self.board[:, :, 3]
+        walls = self.board[0, :, :] + self.board[1, :, :] + 2 * self.board[2, :, :] + 3 * self.board[3,:, :]
         board_string = 'board:' + str(walls.shape) + '\n'
         for line in walls:
             board_string += str(line) + '\n'
@@ -121,7 +121,7 @@ class QuoridorEngineTester:
     def printValidActions(self, player):
         valid_actions = self.game.getValidMoves(self.board, player)
 
-        print('Valid Moves', sum(valid_actions) ,'/', len(valid_actions))
+        print('Valid Moves', sum(valid_actions), '/', len(valid_actions))
 
         pawn_moves = self.pawn_action_translator.keys()
         for i, m in enumerate(pawn_moves):
@@ -131,23 +131,67 @@ class QuoridorEngineTester:
         # Print vwalls
         print('Vwalls:')
         for i in range(self.n_walls):
+            print(i, end=' ')
             for j in range(self.n_walls):
-                print(valid_actions[len(pawn_moves) + self.n_walls * i + j], end=' ')
+                print(valid_actions[self.pawn_actions + self.n_walls * i + j], end=' ')
             print()
+        print(' ', end=' ')
+        for i in range(self.n_walls):
+            print(i, end=' ')
+        print()
 
         # Print hwalls
         print('Hwalls:')
-        num_vwalls = len(pawn_moves) + self.n_walls ** 2
+        num_vwalls = self.pawn_actions + self.n_walls ** 2
         for i in range(self.n_walls):
+            print(i, end=' ')
             for j in range(self.n_walls):
                 print(valid_actions[num_vwalls + self.n_walls * i + j], end=' ')
             print()
 
+        print(' ', end=' ')
+        for i in range(self.n_walls):
+            print(i, end=' ')
+        print()
+
+    def getValidActions(self, player):
+        return self.game.getValidMoves(self.board, player)
+
+    def executeAction(self, action, player):
+        self.board = self.game.getNextState(self.board, player, action)
+
+    def printActionType(self, action, player):
+        if player == 1:
+            ptype = 'red'
+        else:
+            ptype = 'blu'
+
+        if action < self.pawn_actions:
+            print(ptype, 'Move', action)
+        elif action < self.vwall_actions:
+            print(ptype, 'VWall x:', int((action - self.pawn_actions) / self.n_walls), 'y:', (action - self.pawn_actions) % self.n_walls)
+        else:
+            print(ptype, 'HWall x:', int((action - self.vwall_actions) / self.n_walls), 'y:', (action - self.vwall_actions) % self.n_walls)
 
 def main():
     tester = QuoridorEngineTester(9)
-    tester.printValidActions(1)
+    # tester.printValidActions(1)
+    player = 1
+    for _ in range(30):
+        valid_actions = tester.getValidActions(player)
+        pi = [a / sum(valid_actions) for a in valid_actions]
+        action = np.random.choice(len(valid_actions), p=pi)
+        print('Valid Actions', sum(valid_actions), '/', len(valid_actions))
 
+        tester.printActionType(action, player)
+
+        tester.executeAction(action, player)
+        # tester.printValidActions(player)
+        player = - player
+        # print()
+
+    tester.board_pretty(True)
+    # print(tester.board_to_string())
 
 
 if __name__ == "__main__":

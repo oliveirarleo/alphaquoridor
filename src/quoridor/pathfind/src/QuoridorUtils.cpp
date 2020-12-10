@@ -271,7 +271,6 @@ void printBoard(const std::vector<std::vector<int>> &board) {
 }
 
 int countWalls(const std::vector<std::vector<int>> &walls) {
-
     int num_walls = 0;
     int board_size = (int) walls.size();
     for (int i = 1; i < board_size; i += 2) {
@@ -283,8 +282,6 @@ int countWalls(const std::vector<std::vector<int>> &walls) {
 }
 
 void findPlayerPosition(const std::vector<std::vector<int>> &board, int &x, int &y) {
-
-
     int board_size = (int) board.size();
     for (int i = 0; i < board_size; i += 2) {
         for (int j = 0; j < board_size; j += 2) {
@@ -467,12 +464,11 @@ void getWallActions(const std::vector<std::vector<int>> &walls, int player_x, in
             if (walls[i][j] == 0) {
                 // Check vwall
                 if ((walls[i + 1][j] == 0) && (walls[i - 1][j] == 0)) {
-                    actions[pawn_actions + i / 2 * n + j / 2] = 1;
+                    actions[pawn_actions + j/2 * n + i/2] = 1;
                 }
                 // Check hwall
                 if ((walls[i][j + 1] == 0) && (walls[i][j - 1] == 0)) {
-
-                    actions[vwall_actions + i/2 * n + j/2] = 1;
+                    actions[vwall_actions + j/2 * n + i/2] = 1;
                 }
             }
 
@@ -508,7 +504,6 @@ inline std::vector<int> GetValidMoves(
         opponent_pos = RED_POS;
         player_walls = BLUE_WALLS;
     }
-
 
 //    Unifying walls
     std::vector<std::vector<int>> walls(board_size);
