@@ -198,7 +198,7 @@ class QuoridorEngineTester:
         print('pos', start)
         print('goal', end)
 
-        path, steps = QuoridorUtils.FindPath(start, end, walls.flatten().tolist(), walls.shape[0], walls.shape[0])
+        path, steps = QuoridorUtils.FindPath(start, end, walls, walls.shape[0], walls.shape[0])
 
         print('steps', steps)
         self.board_pretty(True, path)
@@ -221,7 +221,7 @@ def main():
         player = - player
 
     # tester.board_pretty(True)
-    tester.printPath(-1)
+    tester.printPath(1)
     # print(tester.board_to_string())
 
 

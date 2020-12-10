@@ -5,7 +5,6 @@
 #include <math.h>
 #include "stlastar.h"
 #include "QuoridorMapSearchNode.h"
-#include "MapInfo.h"
 #include "QuoridorMapInfo.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -16,7 +15,7 @@ inline bool PathExists(
         int start_y,
         int end_x,
         int end_y,
-        const std::vector<int> &world_map,
+        const std::vector<std::vector<int>> &world_map,
         int &map_width,
         int &map_height) {
 
@@ -30,7 +29,7 @@ inline bool PathExists(
 
     // Create an instance of the search class...
 
-    struct MapInfo Map;
+    struct QuoridorMapInfo Map;
     Map.world_map = world_map;
     Map.map_width = map_width;
     Map.map_height = map_height;
@@ -63,7 +62,7 @@ inline bool PathExists(
 inline std::tuple<std::vector<int>, int> FindPath(
         std::vector<int> &start,
         std::vector<int> &end,
-        std::vector<int> &world_map,
+        std::vector<std::vector<int>> &world_map,
         int &map_width,
         int &map_height) {
 
@@ -77,7 +76,7 @@ inline std::tuple<std::vector<int>, int> FindPath(
 
     // Create an instance of the search class...
 
-    struct MapInfo Map;
+    struct QuoridorMapInfo Map;
     Map.world_map = world_map;
     Map.map_width = map_width;
     Map.map_height = map_height;
@@ -384,15 +383,15 @@ bool pathExistsForPlayers(std::vector<std::vector<int>> &walls,
         walls[wall_y][wall_x + 1] = 1;
         walls[wall_y][wall_x - 1] = 1;
     }
-    std::vector<int> lin_walls(board_size * board_size);
-    for (int i = 0; i < board_size; i++) {
-        for (int j = 0; j < board_size; j++) {
-            lin_walls[i * board_size + j] = walls[i][j];
-        }
-    }
+//    std::vector<int> lin_walls(board_size * board_size);
+//    for (int i = 0; i < board_size; i++) {
+//        for (int j = 0; j < board_size; j++) {
+//            lin_walls[i * board_size + j] = walls[i][j];
+//        }
+//    }
 
-    bool result = PathExists(player_x, player_y, player_end_x, player_end_y, lin_walls, board_size, board_size) &&
-                  PathExists(opponent_x, opponent_y, opponent_end_x, opponent_end_y, lin_walls, board_size, board_size);
+    bool result = PathExists(player_x, player_y, player_end_x, player_end_y, walls, board_size, board_size) &&
+                  PathExists(opponent_x, opponent_y, opponent_end_x, opponent_end_y, walls, board_size, board_size);
 
 //    Remove wall
     if (is_vertical) {

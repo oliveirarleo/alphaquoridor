@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "stlastar.h"
-#include "MapInfo.h"
+#include "QuoridorMapInfo.h"
 #include <limits>
 
 const int INF = std::numeric_limits<int>::max();
@@ -24,10 +24,10 @@ class QuoridorMapSearchNode
 public:
     int x;	 // the (x,y) positions of the node
     int y;	
-    struct MapInfo map;
+    struct QuoridorMapInfo map;
 
     QuoridorMapSearchNode() { x = 0; y = 0; }
-    QuoridorMapSearchNode(int px, int py, const MapInfo &map_input) {
+    QuoridorMapSearchNode(int px, int py, const QuoridorMapInfo &map_input) {
         x = px;
         y = py;
         map = map_input;
@@ -175,7 +175,7 @@ inline int QuoridorMapSearchNode::GetMap(int x, int y)
         return INF;
     }
 
-    return map.world_map[(y*map.map_width)+x];
+    return map.world_map[y][x];
 }
 
 
