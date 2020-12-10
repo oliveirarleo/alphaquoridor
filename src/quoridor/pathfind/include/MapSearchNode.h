@@ -21,7 +21,7 @@ class MapSearchNode
 {
 public:
     int x;	 // the (x,y) positions of the node
-    int y;	
+    int y;
     struct MapInfo map;
 
     MapSearchNode() { x = 0; y = 0; }
@@ -37,7 +37,7 @@ public:
     float GetCost( MapSearchNode &successor );
     bool IsSameState( MapSearchNode &rhs );
 
-    void PrintNodeInfo(); 
+    void PrintNodeInfo();
 
     inline int GetMap(int x, int y);
 
@@ -94,8 +94,8 @@ bool MapSearchNode::IsGoal( MapSearchNode &nodeGoal )
 bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapSearchNode *parent_node )
 {
 
-    int parent_x = -1; 
-    int parent_y = -1; 
+    int parent_x = -1;
+    int parent_y = -1;
 
     if( parent_node )
     {
@@ -108,38 +108,38 @@ bool MapSearchNode::GetSuccessors( AStarSearch<MapSearchNode> *astarsearch, MapS
 
     // push each possible move except allowing the search to go backwards
 
-    if( (GetMap( x-1, y ) < 9) 
+    if( (GetMap( x-1, y ) < 9)
         && !((parent_x == x-1) && (parent_y == y))
-        ) 
+        )
     {
         MapSearchNode NewNode = MapSearchNode( x-1, y, map );
         astarsearch->AddSuccessor( NewNode );
-    }	
+    }
 
-    if( (GetMap( x, y-1 ) < 9) 
+    if( (GetMap( x, y-1 ) < 9)
         && !((parent_x == x) && (parent_y == y-1))
-        ) 
+        )
     {
         MapSearchNode NewNode = MapSearchNode( x, y-1, map );
         astarsearch->AddSuccessor( NewNode );
-    }	
+    }
 
     if( (GetMap( x+1, y ) < 9)
         && !((parent_x == x+1) && (parent_y == y))
-        ) 
+        )
     {
         MapSearchNode NewNode = MapSearchNode( x+1, y, map );
         astarsearch->AddSuccessor( NewNode );
-    }	
+    }
 
-        
-    if( (GetMap( x, y+1 ) < 9) 
+
+    if( (GetMap( x, y+1 ) < 9)
         && !((parent_x == x) && (parent_y == y+1))
         )
     {
         MapSearchNode NewNode = MapSearchNode( x, y+1, map );
         astarsearch->AddSuccessor( NewNode );
-    }	
+    }
 
     return true;
 }
@@ -163,7 +163,7 @@ inline int MapSearchNode::GetMap(int x, int y)
             y >= map.map_height
         )
     {
-        return 9;	 
+        return 9;
     }
 
     return map.world_map[(y*map.map_width)+x];

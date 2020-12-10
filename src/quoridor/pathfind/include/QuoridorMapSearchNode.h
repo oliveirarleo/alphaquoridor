@@ -100,7 +100,7 @@ bool QuoridorMapSearchNode::IsGoal( QuoridorMapSearchNode &nodeGoal )
 // is specific to the application
 bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *astarsearch, QuoridorMapSearchNode *parent_node )
 {
-    const int wall = 2;
+    const int wall = 1;
     int parent_x = -1; 
     int parent_y = -1; 
 
@@ -158,7 +158,7 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
 float QuoridorMapSearchNode::GetCost( QuoridorMapSearchNode &successor )
 {
     int next_node = GetMap( successor.x, successor.y );
-    if (next_node > 8)
+    if (next_node >= 1)
         return INF;
     return 1.0;
 }

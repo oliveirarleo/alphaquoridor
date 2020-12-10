@@ -1,9 +1,11 @@
-import math
+import sys
+import os
 
 import numpy as np
 
+sys.path.append(os.getcwd() + '/pathfind/build')
+import QuoridorUtils
 from quoridor.QuoridorGame import QuoridorGame
-from quoridor.QuoridorLogic import QuoridorBoard
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -36,13 +38,13 @@ class QuoridorEngineTester:
         }
 
     def board_to_string(self):
-        walls = self.board[0, :, :] + self.board[1, :, :] + 2 * self.board[2, :, :] + 3 * self.board[3,:, :]
+        walls = self.board[0, :, :] + self.board[1, :, :] + 2 * self.board[2, :, :] + 3 * self.board[3, :, :]
         board_string = 'board:' + str(walls.shape) + '\n'
         for line in walls:
             board_string += str(line) + '\n'
         return board_string
 
-    def board_pretty(self, invert_yaxis=False):
+    def board_pretty(self, invert_yaxis=False, path=[]):
         """
         Simulator.visualize(path) # plot a path
         Simulator.visualize(path_full, path_short) # plot two paths
@@ -97,6 +99,27 @@ class QuoridorEngineTester:
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
+        # for i, p in enumerate(points):
+        #     if i == 0:
+        #         rect = patches.Rectangle(p, 1, 1,
+        #                                  linewidth=1, facecolor='r')
+        #     elif i == len(points) - 1:
+        #         rect = patches.Rectangle(p, 1, 1,
+        #                                  linewidth=1, facecolor='g')
+        #     else:
+        #         rect = patches.Rectangle(p, 1, 1,
+        #                                  linewidth=1, facecolor='b')
+        #     ax_map.add_patch(rect)
+
+        points = list(zip(path, path[1:]))[::2]
+        for i, p in enumerate(points):
+            if i != 0 and i != len(path):
+                # Create a Rectangle patch
+                rect = patches.Rectangle(p, 1, 1,
+                                         linewidth=1, facecolor='g')
+                # Add the patch to the Axes
+                ax_map.add_patch(rect)
+
         ax_map.set_aspect('equal')
         ax_map.set_yticks(np.arange(0, 17, 2))
         ax_map.set_xticks(np.arange(0, 17, 2))
@@ -133,7 +156,7 @@ class QuoridorEngineTester:
         for i in range(self.n_walls):
             print(i, end=' ')
             for j in range(self.n_walls):
-                print(valid_actions[self.pawn_actions + self.n_walls * i + j], end=' ')
+                print(valid_actions[self.pawn_actions + self.n_walls * j + i], end=' ')
             print()
         print(' ', end=' ')
         for i in range(self.n_walls):
@@ -146,7 +169,7 @@ class QuoridorEngineTester:
         for i in range(self.n_walls):
             print(i, end=' ')
             for j in range(self.n_walls):
-                print(valid_actions[num_vwalls + self.n_walls * i + j], end=' ')
+                print(valid_actions[num_vwalls + self.n_walls * j + i], end=' ')
             print()
 
         print(' ', end=' ')
@@ -169,28 +192,49 @@ class QuoridorEngineTester:
         if action < self.pawn_actions:
             print(ptype, 'Move', action)
         elif action < self.vwall_actions:
-            print(ptype, 'VWall x:', int((action - self.pawn_actions) / self.n_walls), 'y:', (action - self.pawn_actions) % self.n_walls)
+            print(ptype, 'VWall x:', int((action - self.pawn_actions) / self.n_walls), 'y:',
+                  (action - self.pawn_actions) % self.n_walls)
         else:
-            print(ptype, 'HWall x:', int((action - self.vwall_actions) / self.n_walls), 'y:', (action - self.vwall_actions) % self.n_walls)
+            print(ptype, 'HWall x:', int((action - self.vwall_actions) / self.n_walls), 'y:',
+                  (action - self.vwall_actions) % self.n_walls)
+
+    def printPath(self, player):
+        end = [self.n - 1, 2 * self.n - 2] if player == 1 else [self.n - 1, 0]
+
+        player_idx = 2 if player == 1 else 3
+        pos = np.where(self.board[player_idx, :, :] == 1)
+        walls = self.board[1, :, :] + self.board[0, :, :]
+
+        start = [pos[1][0], pos[0][0]]
+
+
+        print('pos', start)
+        print('goal', end)
+
+        path, steps = QuoridorUtils.FindPath(start, end, walls.flatten().tolist(), walls.shape[0], walls.shape[0])
+
+        print('steps', steps)
+        self.board_pretty(True, path)
+
 
 def main():
-    tester = QuoridorEngineTester(9)
+    tester = QuoridorEngineTester(5)
     # tester.printValidActions(1)
     player = 1
-    for _ in range(30):
+    for _ in range(20):
         valid_actions = tester.getValidActions(player)
+        if sum(valid_actions) == 0:
+            break
         pi = [a / sum(valid_actions) for a in valid_actions]
         action = np.random.choice(len(valid_actions), p=pi)
         print('Valid Actions', sum(valid_actions), '/', len(valid_actions))
 
         tester.printActionType(action, player)
-
         tester.executeAction(action, player)
-        # tester.printValidActions(player)
         player = - player
-        # print()
 
     tester.board_pretty(True)
+    # tester.printPath(1)
     # print(tester.board_to_string())
 
 

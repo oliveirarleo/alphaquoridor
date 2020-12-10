@@ -6,16 +6,17 @@
 #include "stlastar.h"
 #include "QuoridorMapSearchNode.h"
 #include "MapInfo.h"
+#include "QuoridorMapInfo.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "get_combination.h"
-#include "find_path.h"
 
 
 inline bool PathExists(
-        std::vector<int> &start,
-        std::vector<int> &end,
-        std::vector<int> &world_map,
+        int start_x,
+        int start_y,
+        int end_x,
+        int end_y,
+        const std::vector<int> &world_map,
         int &map_width,
         int &map_height) {
 
@@ -37,8 +38,8 @@ inline bool PathExists(
     AStarSearch<QuoridorMapSearchNode> astarsearch;
 
     // QuoridorMapSearchNode nodeStart;
-    QuoridorMapSearchNode nodeStart = QuoridorMapSearchNode(start[0], start[1], Map);
-    QuoridorMapSearchNode nodeEnd(end[0], end[1], Map);
+    QuoridorMapSearchNode nodeStart = QuoridorMapSearchNode(start_x, start_y, Map);
+    QuoridorMapSearchNode nodeEnd(end_x, end_y, Map);
 
     // Set Start and goal states
     astarsearch.SetStartAndGoalStates(nodeStart, nodeEnd);
@@ -57,43 +58,6 @@ inline bool PathExists(
     }
     astarsearch.EnsureMemoryFreed();
     return false;
-}
-
-inline bool PathExistsAll(
-        std::vector<int> &start,
-        std::vector<int> &end,
-        std::vector<int> &world_map,
-        int &map_width,
-        int &map_height) {
-    struct MapInfo Map;
-    Map.world_map = world_map;
-    Map.map_width = map_width;
-    Map.map_height = map_height;
-    int num_search = start.size() / 2;
-    AStarSearch<QuoridorMapSearchNode> astarsearch;
-
-    for (int s = 0; s < num_search; s++) {
-        // QuoridorMapSearchNode nodeStart;
-        QuoridorMapSearchNode nodeStart = QuoridorMapSearchNode(start[0 + 2 * s], start[1 + 2 * s], Map);
-        QuoridorMapSearchNode nodeEnd(end[0 + 2 * s], end[1 + 2 * s], Map);
-        std::cout << "start: " << start[0 + 2 * s] << " " << start[1 + 2 * s] << " end: " << end[0 + 2 * s] << " "
-                  << end[1 + 2 * s] << "\n";
-        // Set Start and goal states
-        astarsearch.SetStartAndGoalStates(nodeStart, nodeEnd);
-
-        unsigned int SearchState;
-        do {
-            SearchState = astarsearch.SearchStep();
-        } while (SearchState == AStarSearch<QuoridorMapSearchNode>::SEARCH_STATE_SEARCHING);
-
-        if (SearchState != AStarSearch<QuoridorMapSearchNode>::SEARCH_STATE_SUCCEEDED) {
-            astarsearch.EnsureMemoryFreed();
-            return false;
-        }
-        astarsearch.FreeSolutionNodes();
-        astarsearch.EnsureMemoryFreed();
-    }
-    return true;
 }
 
 inline std::tuple<std::vector<int>, int> FindPath(
@@ -211,53 +175,6 @@ inline std::tuple<std::vector<int>, int> FindPath(
     return {path_full, steps};
 }
 
-
-inline std::tuple<std::vector<std::vector<int>>, std::vector<int>> FindPathAll(
-        std::vector<int> agent_position,
-        std::vector<int> targets_position,
-        std::vector<int> &world_map,
-        int &map_width,
-        int &map_height) {
-    struct MapInfo Map;
-    Map.world_map = world_map;
-    Map.map_width = map_width;
-    Map.map_height = map_height;
-
-    int num_targets = targets_position.size() / 2;
-    std::vector<int> start_goal_pair = get_combination(num_targets + 1, 2);
-    std::vector<std::vector<int>> path_all;
-    std::vector<int> steps_all;
-    int start[2];
-    int goal[2];
-
-    for (unsigned long idx = 0; idx < start_goal_pair.size(); idx = idx + 2) {
-        int start_idx = start_goal_pair[idx];
-        int goal_idx = start_goal_pair[idx + 1];
-
-        if (start_idx != 0) {
-            start[0] = targets_position[2 * (start_idx - 1)];
-            start[1] = targets_position[2 * (start_idx - 1) + 1];
-        } else {
-            start[0] = agent_position[0];
-            start[1] = agent_position[1];
-        }
-
-        if (goal_idx != 0) {
-            goal[0] = targets_position[2 * (goal_idx - 1)];
-            goal[1] = targets_position[2 * (goal_idx - 1) + 1];
-
-        } else {
-            goal[0] = agent_position[0];
-            goal[1] = agent_position[1];
-        }
-        auto[path_short_single, steps_used] = find_path(start, goal, Map);
-        path_all.push_back(path_short_single);
-        steps_all.push_back(steps_used);
-    }
-
-    // return path_all;
-    return {path_all, steps_all};
-}
 
 void printBoard(const std::vector<std::vector<int>> &board) {
     for (const auto &line : board) {
@@ -451,8 +368,50 @@ void getPawnActions(int player_x, int player_y, const std::vector<std::vector<in
     }
 }
 
-void getWallActions(const std::vector<std::vector<int>> &walls, int player_x, int player_y, int opponent_x,
-                    int opponent_y, int player_num_walls_placed, std::vector<int> &actions) {
+bool pathExistsForPlayers(std::vector<std::vector<int>> &walls,
+                          int player_x, int player_y, int player_end_x, int player_end_y,
+                          int opponent_x, int opponent_y, int opponent_end_x, int opponent_end_y,
+                          int wall_x, int wall_y, bool is_vertical) {
+    int board_size = (int) walls.size();
+
+//    Insert wall
+    if (is_vertical) {
+        walls[wall_y][wall_x] = 1;
+        walls[wall_y + 1][wall_x] = 1;
+        walls[wall_y - 1][wall_x] = 1;
+    } else {
+        walls[wall_y][wall_x] = 1;
+        walls[wall_y][wall_x + 1] = 1;
+        walls[wall_y][wall_x - 1] = 1;
+    }
+    std::vector<int> lin_walls(board_size * board_size);
+    for (int i = 0; i < board_size; i++) {
+        for (int j = 0; j < board_size; j++) {
+            lin_walls[i * board_size + j] = walls[i][j];
+        }
+    }
+
+    bool result = PathExists(player_x, player_y, player_end_x, player_end_y, lin_walls, board_size, board_size) &&
+                  PathExists(opponent_x, opponent_y, opponent_end_x, opponent_end_y, lin_walls, board_size, board_size);
+
+//    Remove wall
+    if (is_vertical) {
+        walls[wall_y][wall_x] = 0;
+        walls[wall_y + 1][wall_x] = 0;
+        walls[wall_y - 1][wall_x] = 0;
+    } else {
+        walls[wall_y][wall_x] = 0;
+        walls[wall_y][wall_x + 1] = 0;
+        walls[wall_y][wall_x - 1] = 0;
+    }
+    return result;
+}
+
+
+void getWallActions(std::vector<std::vector<int>> &walls,
+                    int player_x, int player_y, int player_end_x, int player_end_y,
+                    int opponent_x, int opponent_y, int opponent_end_x, int opponent_end_y,
+                    int player_num_walls_placed, std::vector<int> &actions) {
     if (player_num_walls_placed >= 10)
         return;
     int board_size = (int) walls.size();
@@ -464,11 +423,43 @@ void getWallActions(const std::vector<std::vector<int>> &walls, int player_x, in
             if (walls[i][j] == 0) {
                 // Check vwall
                 if ((walls[i + 1][j] == 0) && (walls[i - 1][j] == 0)) {
-                    actions[pawn_actions + j/2 * n + i/2] = 1;
+
+                    int connections = 0;
+                    if ((i + 3 >= board_size) || (walls[i + 3][j] == 1) || (walls[i + 2][j + 1] == 1) ||
+                        (walls[i + 2][j - 1] == 1))
+                        connections += 1;
+                    if ((i - 3 < 0) || (walls[i - 3][j] == 1) || (walls[i - 2][j + 1] == 1) ||
+                        (walls[i - 2][j - 1] == 1))
+                        connections += 1;
+                    if ((walls[i][j + 1] == 1) || (walls[i][j - 1] == 1))
+                        connections += 1;
+
+                    if (connections < 2 ||
+                        pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y, opponent_x,
+                                             opponent_y, opponent_end_x, opponent_end_y, j, i, true)) {
+                        actions[pawn_actions + j / 2 * n + i / 2] = 1;
+                    }
+
+
                 }
                 // Check hwall
                 if ((walls[i][j + 1] == 0) && (walls[i][j - 1] == 0)) {
-                    actions[vwall_actions + j/2 * n + i/2] = 1;
+                    int connections = 0;
+                    if ((j + 3 >= board_size) || (walls[i][j + 3] == 1) || (walls[i + 1][j + 2] == 1) ||
+                        (walls[i - 1][j + 2] == 1))
+                        connections += 1;
+                    if ((j - 3 < 0) || (walls[i][j - 3] == 1) || (walls[i + 1][j - 2] == 1) ||
+                        (walls[i - 1][j - 2] == 1))
+                        connections += 1;
+                    if ((walls[i + 1][j] == 1) || (walls[i - 1][j] == 1))
+                        connections += 1;
+
+                    if (connections < 2 ||
+                        pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y, opponent_x,
+                                             opponent_y, opponent_end_x, opponent_end_y, j, i, false)) {
+                        actions[vwall_actions + j / 2 * n + i / 2] = 1;
+                    }
+
                 }
             }
 
@@ -494,15 +485,23 @@ inline std::vector<int> GetValidMoves(
     const int BLUE_WALLS = 1;
 
 // Choosing player
-    int player_pos, player_walls, opponent_pos;
+    int player_pos, player_walls, opponent_pos, player_goal_x, player_goal_y, opponent_goal_x, opponent_goal_y;
     if (player == 1) {
         player_pos = RED_POS;
         opponent_pos = BLUE_POS;
         player_walls = RED_WALLS;
+        player_goal_x = (board_size - 1)/2;
+        player_goal_y = board_size - 1;
+        opponent_goal_x = (board_size - 1)/2;
+        opponent_goal_y = 0;
     } else {
         player_pos = BLUE_POS;
         opponent_pos = RED_POS;
         player_walls = BLUE_WALLS;
+        player_goal_x = (board_size - 1)/2;
+        player_goal_y = 0;
+        opponent_goal_x = (board_size - 1)/2;
+        opponent_goal_y = board_size - 1;
     }
 
 //    Unifying walls
@@ -523,7 +522,10 @@ inline std::vector<int> GetValidMoves(
 
 //    Get Wall actions
     int player_num_walls_placed = countWalls(board[player_walls]);
-    getWallActions(walls, player_x, player_y, opponent_x, opponent_y, player_num_walls_placed, actions);
+    getWallActions(walls,
+                   player_x, player_y, player_goal_x, player_goal_y,
+                   opponent_x, opponent_y, opponent_goal_x, opponent_goal_y,
+                   player_num_walls_placed, actions);
 
     return actions;
 }
@@ -533,8 +535,6 @@ inline PYBIND11_MODULE(QuoridorUtils, module) {
     module.doc() = "Python wrapper of AStar c++ implementation";
 
     module.def("PathExists", &PathExists, "Check if path exists");
-    module.def("PathExistsAll", &PathExists, "Check if path exists");
     module.def("FindPath", &FindPath, "Find a collision-free path");
-    module.def("FindPathAll", &FindPathAll, "Find a collision-free path");
     module.def("GetValidMoves", &GetValidMoves, "Find a collision-free path");
 }
