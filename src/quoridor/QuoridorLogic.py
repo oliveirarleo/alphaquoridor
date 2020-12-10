@@ -50,7 +50,7 @@ class QuoridorBoard:
 
     def setInitBoard(self):
         # empty board
-        self.board = np.zeros((self.board_len, self.board_len, 4), np.int16)
+        self.board = np.zeros((4, self.board_len, self.board_len), np.int16)
 
         midpoint = int(self.board_len / 2)
         lastpoint = self.board_len - 1
@@ -59,13 +59,13 @@ class QuoridorBoard:
         self.red_position = (0, midpoint)
         self.red_goal = (lastpoint, midpoint)
         self.red_walls = 10
-        self.board[self.red_position[0], self.red_position[1], 2] = 1
+        self.board[2, self.red_position[0], self.red_position[1]] = 1
 
         # blue player position
         self.blue_position = (lastpoint, midpoint)
         self.blue_goal = (0, midpoint)
         self.blue_walls = 10
-        self.board[self.blue_position[0], self.blue_position[1], 3] = 1
+        self.board[3, self.blue_position[0], self.blue_position[1]] = 1
 
         return self.board
 
@@ -74,14 +74,14 @@ class QuoridorBoard:
 
     def findPlayer(self, player):
         player = 2 if player == 1 else 3
-        pos = np.where(self.board[:, :, player] == 1)
+        pos = np.where(self.board[player, :, :] == 1)
         return pos[0][0], pos[1][0]
 
     def countRedWalls(self):
-        return np.sum(self.board[:, :, 0]) / 3
+        return np.sum(self.board[0, :, :]) / 3
 
     def countBlueWalls(self):
-        return np.sum(self.board[:, :, 1]) / 3
+        return np.sum(self.board[1, :, :]) / 3
 
     def executeAction(self, player, action):
         pawn_moves = 12
@@ -104,23 +104,23 @@ class QuoridorBoard:
     @staticmethod
     def move(board, player, x, y, dx=0, dy=0):
         player_idx = 2 if player == 1 else 3
-        board[y, x, player_idx] = 0
-        board[y + dy, x + dx, player_idx] = 1
+        board[player_idx, y, x] = 0
+        board[player_idx, y + dy, x + dx] = 1
         return board
 
     @staticmethod
     def placeVerticalWall(board, player, x, y):
         player_idx = 0 if player == 1 else 1
-        board[y, x, player_idx] = 1
-        board[y + 1, x, player_idx] = 1
-        board[y - 1, x, player_idx] = 1
+        board[player_idx, y, x] = 1
+        board[player_idx, y + 1, x] = 1
+        board[player_idx, y - 1, x] = 1
         return board
 
     @staticmethod
     def placeHorizontalWall(board, player, x, y):
         player_idx = 0 if player == 1 else 1
-        board[y, x, player_idx] = 1
-        board[y, x + 1, player_idx] = 1
-        board[y, x - 1, player_idx] = 1
+        board[player_idx, y, x] = 1
+        board[player_idx, y, x + 1] = 1
+        board[player_idx, y, x - 1] = 1
         return board
 

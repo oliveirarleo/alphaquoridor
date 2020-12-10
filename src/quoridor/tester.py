@@ -24,24 +24,34 @@ def board_pretty(board):
 
     fig_map, ax_map = plt.subplots(1, 1)
 
-    walls = (board[:, :, 0] + board[:, :, 1])
     # plot retangle obstacles
-    for idx, x in np.ndenumerate(walls):
+    for idx, x in np.ndenumerate(board[0, :, :]):
         idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='k')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-        elif idx[0] % 2 == 1 or idx[1] % 2 == 1:
+        if idx[0] % 2 == 1 or idx[1] % 2 == 1:
             # Create a Rectangle patch
             rect = patches.Rectangle(idx, 1, 1,
                                      linewidth=1, facecolor='lightgray')
             # Add the patch to the Axes
             ax_map.add_patch(rect)
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='darkred')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
 
-    for idx, x in np.ndenumerate(board[:, :, 2]):
+    for idx, x in np.ndenumerate(board[1, :, :]):
+        idx = (idx[1], idx[0])
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='darkblue')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    for idx, x in np.ndenumerate(board[2, :, :]):
         idx = (idx[1], idx[0])
         if x == 1:
             # Create a Rectangle patch
@@ -50,7 +60,7 @@ def board_pretty(board):
             # Add the patch to the Axes
             ax_map.add_patch(rect)
 
-    for idx, x in np.ndenumerate(board[:, :, 3]):
+    for idx, x in np.ndenumerate(board[3, :, :]):
         idx = (idx[1], idx[0])
         if x == 1:
             # Create a Rectangle patch
@@ -71,14 +81,14 @@ def board_pretty(board):
 
 
 def main():
-    n = 5
+    n = 9
+
     quoridor_game = QuoridorGame(n)
     init_board = quoridor_game.getInitBoard()
 
-    print('Init Board', tostring_board(init_board))
+    # print('Init Board', tostring_board(init_board))
     print('Board Size', quoridor_game.getBoardSize())
     print('Action Size', quoridor_game.getActionSize())
-    print('Valid Moves', quoridor_game.getValidMoves(init_board, 1))
 
     # TEST GET GAME ENDED
     # b = init_board
@@ -101,9 +111,9 @@ def main():
 
     vertical_wall_moves = pawn_moves + (n-1)*(n-1)
     hwx = 1
-    hwy = 3
+    hwy = 2
     print('HW' + str(hwx) + str(hwy))
-    b = quoridor_game.getNextState(b, 1, vertical_wall_moves + hwx * 8 + hwy)
+    b = quoridor_game.getNextState(b, -1, vertical_wall_moves + hwx * 8 + hwy)
 
     # TEST MOVING
     print('Red N')
@@ -114,12 +124,9 @@ def main():
     b = quoridor_game.getNextState(b, -1, 2)
     board_pretty(b)
 
-    # quoridor_board = QuoridorBoard(9)
-    # quoridor_board.setInitBoard()
-    # print('Red Position', quoridor_board.findPlayer(1))
-    # print('Blue Position', quoridor_board.findPlayer(-1))
-    # print('Red Walls', quoridor_board.countRedWalls())
-    # print('Blue Walls', quoridor_board.countRedWalls())
+    valid_moves = quoridor_game.getValidMoves(b, 1)
+    print('Valid Moves', len(valid_moves))
+    print('Valid Moves', valid_moves)
 
 
 if __name__ == "__main__":
