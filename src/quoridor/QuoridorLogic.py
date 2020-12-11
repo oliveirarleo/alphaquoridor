@@ -35,13 +35,13 @@ class QuoridorBoard:
             # JW
             7: partial(self.move, dx=-4, dy=+0),
             # JNE
-            8: partial(self.move, dx=-2, dy=+2),
+            8: partial(self.move, dx=+2, dy=+2),
             # JNW
-            9: partial(self.move, dx=+2, dy=+2),
+            9: partial(self.move, dx=-2, dy=+2),
             # JSE
-            10: partial(self.move, dx=-2, dy=-2),
+            10: partial(self.move, dx=+2, dy=-2),
             # JSW
-            11: partial(self.move, dx=+2, dy=-2),
+            11: partial(self.move, dx=-2, dy=-2),
             # PLACE VERTICAL WALL
             'vw': self.placeVerticalWall,
             # PLACE HORIZONTAL WALL
@@ -70,11 +70,11 @@ class QuoridorBoard:
         return self.board
 
     def setBoard(self, board):
-        self.board = np.copy(board)
+        self.board = np.array(board, copy=True)
 
     def findPlayer(self, player):
-        player = 2 if player == 1 else 3
-        pos = np.where(self.board[player, :, :] == 1)
+        player_idx = 2 if player == 1 else 3
+        pos = np.where(self.board[player_idx, :, :] == 1)
         return pos[0][0], pos[1][0]
 
     def countRedWalls(self):

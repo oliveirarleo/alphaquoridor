@@ -3,12 +3,87 @@ import os
 
 import numpy as np
 
-sys.path.append('../..')
-sys.path.append(os.getcwd() + '/pathfind/build')
-sys.path.append(os.getcwd() + '/src')
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 import QuoridorUtils
 from src.alphazero_general.Game import Game
 from .QuoridorLogic import QuoridorBoard
+
+
+def board_pretty(board, invert_yaxis=False, path=[]):
+    """
+    Simulator.visualize(path) # plot a path
+    Simulator.visualize(path_full, path_short) # plot two paths
+
+    path is a list for the trajectory. [x[0], y[0], x[1], y[1], ...]
+    """
+
+    fig_map, ax_map = plt.subplots(1, 1)
+
+    # plot retangle obstacles
+    for idx, x in np.ndenumerate(board[0, :, :]):
+        idx = (idx[1], idx[0])
+        if idx[0] % 2 == 1 or idx[1] % 2 == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='lightgray')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='darkred')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    for idx, x in np.ndenumerate(board[1, :, :]):
+        idx = (idx[1], idx[0])
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='darkblue')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    for idx, x in np.ndenumerate(board[2, :, :]):
+        idx = (idx[1], idx[0])
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='r')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    for idx, x in np.ndenumerate(board[3, :, :]):
+        idx = (idx[1], idx[0])
+        if x == 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(idx, 1, 1,
+                                     linewidth=1, facecolor='b')
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    points = list(zip(path, path[1:]))[::2]
+    for i, p in enumerate(points):
+        if i != 0 and i != len(points) - 1:
+            # Create a Rectangle patch
+            rect = patches.Rectangle(p, 1, 1,
+                                     linewidth=1, facecolor='g', alpha=0.5)
+            # Add the patch to the Axes
+            ax_map.add_patch(rect)
+
+    ax_map.set_aspect('equal')
+    ax_map.set_yticks(np.arange(0, 17, 2))
+    ax_map.set_xticks(np.arange(0, 17, 2))
+    ax_map.set_xlim([0, 17])
+    ax_map.set_ylim([0, 17])
+    if invert_yaxis:
+        ax_map.invert_yaxis()
+    plt.show()
 
 
 class QuoridorGame(Game):
@@ -54,9 +129,10 @@ class QuoridorGame(Game):
         """
         quoridor_board = QuoridorBoard(self.n)
         quoridor_board.setBoard(board)
-        return quoridor_board.executeAction(player, action)
+        next_board = quoridor_board.executeAction(player, action)
+        return (self.flipBoard(next_board), -player)
 
-    def getValidMoves(self, board, player):
+    def getValidActions(self, board, player):
         """
         Input:
             board: current board
@@ -80,10 +156,21 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        if np.sum(board[2, self.board_len - 1, :]) > 0:
-            return player
-        elif np.sum(board[3, 0, :]) > 0:
-            return -player
+        # print()
+        # print(player)
+        # print(board[2, self.board_len - 1, :])
+        # print(board[3, 0, :])
+        #
+        # print(np.any(board[2, self.board_len - 1, :]), player)
+        # print(np.any(board[3, 0, :]), -player)
+        # print(board[0, :, :])
+        # print(board[1,:, :])
+        # board_pretty(board)
+
+        if np.any(board[2, self.board_len - 1, :]):
+            return 1
+        elif np.any(board[3, 0, :]):
+            return -1
         return 0
 
     def getCanonicalForm(self, board, player):
@@ -100,7 +187,18 @@ class QuoridorGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
-        return board
+        if player == 1:
+            return board
+        else:
+            return self.flipBoard(board)
+
+    def flipBoard(self, board):
+        b = np.array(board, copy=True)
+        b[2, :, :], b[3, :, :] = b[3, :, :], b[2, :, :]
+        b[0, :, :], b[1, :, :] = b[1, :, :], b[0, :, :]
+        for i in range(4):
+            b[i, :, :] = np.flip(b[i, :, :])
+        return b
 
     def getSymmetries(self, board, pi):
         """
@@ -113,7 +211,18 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        return [(board, pi)]
+        pi2 = np.array(pi)
+        for i in range(0, 8, 2):
+            pi2[i], pi2[i + 1] = pi2[i + 1], pi2[i]
+
+        pi2[9], pi2[10] = pi2[10], pi2[9]
+        pi2[8], pi2[11] = pi2[11], pi2[8]
+        vws = pi2[12:12 + (self.n - 1) ** 2].reshape((self.n - 1), (self.n - 1))
+        vws = np.flip(vws).ravel()
+        hws = pi2[12 + (self.n - 1) ** 2:].reshape((self.n - 1), (self.n - 1))
+        hws = np.flip(hws).ravel()
+        pi2 = list(pi2[:12]) + list(vws) + list(hws)
+        return [(board, pi), (self.flipBoard(board), pi2)]
 
     def stringRepresentation(self, board):
         """
@@ -124,4 +233,8 @@ class QuoridorGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-        return board.tostring()
+
+        b = board[0, :, :] + 2 * board[1, :, :] + 3 * board[2, :, :] + 4 * board[3, :, :]
+        # s = b.tostring()
+        # print(str(b))
+        return b.tostring()

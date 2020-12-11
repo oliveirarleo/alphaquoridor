@@ -1,10 +1,11 @@
 import logging
-
+import sys
 import coloredlogs
 
+sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
+from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.QuoridorGame import QuoridorGame as Game
-from quoridor.pytorch import NNetWrapper as nn
 from utils import *
 
 log = logging.getLogger(__name__)
@@ -22,8 +23,8 @@ args = dotdict({
     'cpuct': 1,
 
     'checkpoint': './temp/',
-    'load_model': True,
-    'load_folder_file': ('./temp/', 'checkpoint_3.pth.tar'),
+    'load_model': False,
+    'load_folder_file': ('/dev/models/8x100x50','best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
 
 })
@@ -31,7 +32,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(6)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
@@ -50,6 +51,7 @@ def main():
         c.loadTrainExamples()
 
     log.info('Starting the learning process 🎉')
+
     c.learn()
 
 

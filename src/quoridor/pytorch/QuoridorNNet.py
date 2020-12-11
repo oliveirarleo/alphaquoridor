@@ -3,13 +3,9 @@ import sys
 sys.path.append('..')
 from utils import *
 
-import argparse
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from torchvision import datasets, transforms
-from torch.autograd import Variable
 
 
 class QuoridorNNet(nn.Module):
@@ -20,7 +16,7 @@ class QuoridorNNet(nn.Module):
         self.args = args
 
         super(QuoridorNNet, self).__init__()
-        self.conv1 = nn.Conv2d(1, args.num_channels, 3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(4, args.num_channels, 3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
         self.conv4 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
@@ -42,7 +38,7 @@ class QuoridorNNet(nn.Module):
 
     def forward(self, s):
         # s: batch_size x board_x x board_y
-        s = s.view(-1, 1, self.board_x, self.board_y)  # batch_size x 1 x board_x x board_y
+        s = s.view(-1, 4, self.board_x, self.board_y)  # batch_size x 1 x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))  # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn2(self.conv2(s)))  # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn3(self.conv3(s)))  # batch_size x num_channels x (board_x-2) x (board_y-2)

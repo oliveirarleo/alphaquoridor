@@ -3,11 +3,12 @@ import os
 
 import numpy as np
 
-sys.path.append(os.getcwd() + '/pathfind/build')
+sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 import QuoridorUtils
-from quoridor.QuoridorGame import QuoridorGame
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
+from quoridor.QuoridorGame import QuoridorGame
 
 
 class QuoridorEngineTester:
@@ -104,7 +105,7 @@ class QuoridorEngineTester:
             if i != 0 and i != len(points) - 1:
                 # Create a Rectangle patch
                 rect = patches.Rectangle(p, 1, 1,
-                                         linewidth=1, facecolor='g')
+                                         linewidth=1, facecolor='g', alpha=0.5)
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
@@ -130,7 +131,7 @@ class QuoridorEngineTester:
         self.board = self.game.getNextState(self.board, player, self.pawn_action_translator[direction])
 
     def printValidActions(self, player):
-        valid_actions = self.game.getValidMoves(self.board, player)
+        valid_actions = self.game.getValidActions(self.board, player)
 
         print('Valid Moves', sum(valid_actions), '/', len(valid_actions))
 
@@ -166,10 +167,11 @@ class QuoridorEngineTester:
         print()
 
     def getValidActions(self, player):
-        return self.game.getValidMoves(self.board, player)
+        return self.game.getValidActions(self.board, player)
 
     def executeAction(self, action, player):
-        self.board = self.game.getNextState(self.board, player, action)
+        self.board, next_player = self.game.getNextState(self.board, player, action)
+        return next_player
 
     def printActionType(self, action, player):
         if player == 1:
@@ -205,7 +207,7 @@ class QuoridorEngineTester:
 
 
 def main():
-    tester = QuoridorEngineTester(9)
+    tester = QuoridorEngineTester(3)
     # tester.printValidActions(1)
     player = 1
     for _ in range(40):
@@ -215,13 +217,16 @@ def main():
         pi = [a / sum(valid_actions) for a in valid_actions]
         action = np.random.choice(len(valid_actions), p=pi)
         print('Valid Actions', sum(valid_actions), '/', len(valid_actions))
+        # tester.printValidActions(player)
 
         tester.printActionType(action, player)
-        tester.executeAction(action, player)
-        player = - player
+        player = tester.executeAction(action, player)
+        tester.board_pretty()
+        if tester.game.getGameEnded(tester.board, player) != 0:
+            print('GAME ENDED')
+            tester.board_pretty()
+            break
 
-    # tester.board_pretty(True)
-    tester.printPath(1)
     # print(tester.board_to_string())
 
 
