@@ -103,14 +103,26 @@ class QuoridorBoard:
 
     @staticmethod
     def move(board, player, x, y, dx=0, dy=0):
-        player_idx = 2 if player == 1 else 3
+        if player == 1:
+            player_idx = 2
+        else:
+            # dy = -dy
+            # dx = -dx
+            player_idx = 3
+
         board[player_idx, y, x] = 0
         board[player_idx, y + dy, x + dx] = 1
         return board
 
     @staticmethod
     def placeVerticalWall(board, player, x, y):
-        player_idx = 0 if player == 1 else 1
+        if player == 1:
+            player_idx = 0
+        else:
+            # boardsize = board.shape[1]-1
+            # y = boardsize-y
+            # x = boardsize-x
+            player_idx = 1
         board[player_idx, y, x] = 1
         board[player_idx, y + 1, x] = 1
         board[player_idx, y - 1, x] = 1
@@ -118,7 +130,13 @@ class QuoridorBoard:
 
     @staticmethod
     def placeHorizontalWall(board, player, x, y):
-        player_idx = 0 if player == 1 else 1
+        if player == 1:
+            player_idx = 0
+        else:
+            # boardsize = board.shape[1]-1
+            # y = boardsize-y
+            # x = boardsize-x
+            player_idx = 1
         board[player_idx, y, x] = 1
         board[player_idx, y, x + 1] = 1
         board[player_idx, y, x - 1] = 1

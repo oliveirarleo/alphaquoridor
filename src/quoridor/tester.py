@@ -2,13 +2,21 @@ import sys
 import os
 
 import numpy as np
+import logging
+from utils import dotdict
+import coloredlogs
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 import QuoridorUtils
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-from quoridor.QuoridorGame import QuoridorGame
+from alphazero_general.MCTS import MCTS
+
+from quoridor.pytorch.NNet import NNetWrapper as nn
+from quoridor.QuoridorGame import QuoridorGame as Game
+
+log = logging.getLogger(__name__)
 
 
 class QuoridorEngineTester:
@@ -16,7 +24,7 @@ class QuoridorEngineTester:
         self.n = n
         self.n_walls = n - 1
 
-        self.game = QuoridorGame(self.n)
+        self.game = Game(self.n)
         self.init_board = self.game.getInitBoard()
         self.board = self.init_board
 
@@ -45,7 +53,8 @@ class QuoridorEngineTester:
             board_string += str(line) + '\n'
         return board_string
 
-    def board_pretty(self, invert_yaxis=False, path=[]):
+    @staticmethod
+    def board_pretty(board, invert_yaxis=False, path=[]):
         """
         Simulator.visualize(path) # plot a path
         Simulator.visualize(path_full, path_short) # plot two paths
@@ -56,7 +65,7 @@ class QuoridorEngineTester:
         fig_map, ax_map = plt.subplots(1, 1)
 
         # plot retangle obstacles
-        for idx, x in np.ndenumerate(self.board[0, :, :]):
+        for idx, x in np.ndenumerate(board[0, :, :]):
             idx = (idx[1], idx[0])
             if idx[0] % 2 == 1 or idx[1] % 2 == 1:
                 # Create a Rectangle patch
@@ -71,7 +80,7 @@ class QuoridorEngineTester:
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
-        for idx, x in np.ndenumerate(self.board[1, :, :]):
+        for idx, x in np.ndenumerate(board[1, :, :]):
             idx = (idx[1], idx[0])
             if x == 1:
                 # Create a Rectangle patch
@@ -82,7 +91,7 @@ class QuoridorEngineTester:
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
-        for idx, x in np.ndenumerate(self.board[2, :, :]):
+        for idx, x in np.ndenumerate(board[2, :, :]):
             idx = (idx[1], idx[0])
             if x == 1:
                 # Create a Rectangle patch
@@ -91,7 +100,7 @@ class QuoridorEngineTester:
                 # Add the patch to the Axes
                 ax_map.add_patch(rect)
 
-        for idx, x in np.ndenumerate(self.board[3, :, :]):
+        for idx, x in np.ndenumerate(board[3, :, :]):
             idx = (idx[1], idx[0])
             if x == 1:
                 # Create a Rectangle patch
@@ -203,31 +212,105 @@ class QuoridorEngineTester:
         path, steps = QuoridorUtils.FindPath(start, end, walls, walls.shape[0], walls.shape[0])
 
         print('steps', steps)
-        self.board_pretty(True, path)
+        self.board_pretty(self.board, True, path)
 
 
 def main():
-    tester = QuoridorEngineTester(3)
-    # tester.printValidActions(1)
-    player = 1
-    for _ in range(40):
-        valid_actions = tester.getValidActions(player)
-        if sum(valid_actions) == 0:
-            break
-        pi = [a / sum(valid_actions) for a in valid_actions]
-        action = np.random.choice(len(valid_actions), p=pi)
-        print('Valid Actions', sum(valid_actions), '/', len(valid_actions))
-        # tester.printValidActions(player)
+    # tester = QuoridorEngineTester(3)
+    # # tester.printValidActions(1)
+    # player = 1
+    # for _ in range(40):
+    #     valid_actions = tester.getValidActions(player)
+    #     if sum(valid_actions) == 0:
+    #         break
+    #     pi = [a / sum(valid_actions) for a in valid_actions]
+    #     action = np.random.choice(len(valid_actions), p=pi)
+    #     print('Valid Actions', sum(valid_actions), '/', len(valid_actions))
+    #     # tester.printValidActions(player)
+    #
+    #     tester.printActionType(action, player)
+    #     tester.board_pretty()
+    #
+    #     player = tester.executeAction(action, player)
+    #     if tester.game.getGameEnded(tester.board, player) != 0:
+    #         print('GAME ENDED')
+    #         tester.board_pretty()
+    #         break
 
-        tester.printActionType(action, player)
-        player = tester.executeAction(action, player)
-        tester.board_pretty()
-        if tester.game.getGameEnded(tester.board, player) != 0:
-            print('GAME ENDED')
-            tester.board_pretty()
-            break
+    # game = QuoridorGame(3)
+    # ww = 0
+    # bw = 0
+    # for j in range(200):
+    #     board = game.getInitBoard()
+    #     i = 1
+    #     # QuoridorEngineTester.board_pretty(board)
+    #     while True:
+    #         # print(i)
+    #         i += 1
+    #         valid_actions = game.getValidActions(board, 1)
+    #         pi = [a / sum(valid_actions) for a in valid_actions]
+    #         action = np.random.choice(len(valid_actions), p=pi)
+    #         board, player = game.getNextState(board, 1, action)
+    #
+    #         board = game.getCanonicalForm(board, player)
+    #         # QuoridorEngineTester.board_pretty(board)
+    #         if game.getGameEnded(board, 1) != 0:
+    #             # print('GAME ENDED', game.getGameEnded(board, 1))
+    #             break
+    #     # print(i)
+    #     if i % 2:
+    #         ww += 1
+    #     else:
+    #         bw+=1
+    # QuoridorEngineTester.board_pretty(board)
+    # # print(tester.board_to_string())
+    # print(ww, bw)
 
-    # print(tester.board_to_string())
+    args = dotdict({
+        'numIters': 1000,
+        'numEps': 100,  # Number of complete self-play games to simulate during a new iteration.
+        'tempThreshold': 15,  #
+        'updateThreshold': 0.6,
+        # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+        'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
+        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
+        'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
+        'cpuct': 1,
+
+        'checkpoint': './temp/',
+        'load_model': False,
+        'load_folder_file': ('/dev/models/8x100x50', 'best.pth.tar'),
+        'numItersForTrainExamplesHistory': 20,
+
+    })
+
+    log.info('Loading %s...', Game.__name__)
+    game = Game(3)
+
+    log.info('Loading %s...', nn.__name__)
+    nnet = nn(game)
+    mcts = MCTS(game, nnet, args)
+    board = game.getInitBoard()
+
+    episodeStep = 0
+    curPlayer = 1
+    while True:
+        print(episodeStep)
+        QuoridorEngineTester.board_pretty(board)
+        episodeStep += 1
+        canonicalBoard = game.getCanonicalForm(board, curPlayer)
+        temp = int(episodeStep < args.tempThreshold)
+
+        pi = mcts.getActionProb(canonicalBoard, temp=temp)
+        print('pi', pi)
+        la = game.getValidActions(board, curPlayer)
+        action = np.random.choice(len(pi), p=pi)
+        board, curPlayer = game.getNextState(board, curPlayer, action)
+
+        r = game.getGameEnded(board, curPlayer)
+
+        if r != 0:
+            break
 
 
 if __name__ == "__main__":

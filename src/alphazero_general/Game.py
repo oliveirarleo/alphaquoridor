@@ -46,7 +46,7 @@ class Game():
         """
         pass
 
-    def getValidMoves(self, board, player):
+    def getValidActions(self, board, player):
         """
         Input:
             board: current board

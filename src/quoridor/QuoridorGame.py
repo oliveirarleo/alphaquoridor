@@ -129,8 +129,8 @@ class QuoridorGame(Game):
         """
         quoridor_board = QuoridorBoard(self.n)
         quoridor_board.setBoard(board)
-        next_board = quoridor_board.executeAction(player, action)
-        return (self.flipBoard(next_board), -player)
+        next = quoridor_board.executeAction(player, action)
+        return (self.flipBoard(next), -player)
 
     def getValidActions(self, board, player):
         """
@@ -156,17 +156,6 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        # print()
-        # print(player)
-        # print(board[2, self.board_len - 1, :])
-        # print(board[3, 0, :])
-        #
-        # print(np.any(board[2, self.board_len - 1, :]), player)
-        # print(np.any(board[3, 0, :]), -player)
-        # print(board[0, :, :])
-        # print(board[1,:, :])
-        # board_pretty(board)
-
         if np.any(board[2, self.board_len - 1, :]):
             return 1
         elif np.any(board[3, 0, :]):
@@ -193,11 +182,14 @@ class QuoridorGame(Game):
             return self.flipBoard(board)
 
     def flipBoard(self, board):
-        b = np.array(board, copy=True)
-        b[2, :, :], b[3, :, :] = b[3, :, :], b[2, :, :]
-        b[0, :, :], b[1, :, :] = b[1, :, :], b[0, :, :]
+        b = np.zeros(board.shape, dtype=int)
+        b[2, :, :] = np.array(board[3, :, :], copy=True)
+        b[3, :, :] = np.array(board[2, :, :], copy=True)
+        b[0, :, :] = np.array(board[1, :, :], copy=True)
+        b[1, :, :] = np.array(board[0, :, :], copy=True)
+
         for i in range(4):
-            b[i, :, :] = np.flip(b[i, :, :])
+            b[i, :, :] = np.flip(b[i, :, :], (0, 1))
         return b
 
     def getSymmetries(self, board, pi):
@@ -211,18 +203,7 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        pi2 = np.array(pi)
-        for i in range(0, 8, 2):
-            pi2[i], pi2[i + 1] = pi2[i + 1], pi2[i]
-
-        pi2[9], pi2[10] = pi2[10], pi2[9]
-        pi2[8], pi2[11] = pi2[11], pi2[8]
-        vws = pi2[12:12 + (self.n - 1) ** 2].reshape((self.n - 1), (self.n - 1))
-        vws = np.flip(vws).ravel()
-        hws = pi2[12 + (self.n - 1) ** 2:].reshape((self.n - 1), (self.n - 1))
-        hws = np.flip(hws).ravel()
-        pi2 = list(pi2[:12]) + list(vws) + list(hws)
-        return [(board, pi), (self.flipBoard(board), pi2)]
+        return [(board, pi)]
 
     def stringRepresentation(self, board):
         """
@@ -234,7 +215,4 @@ class QuoridorGame(Game):
                          Required by MCTS for hashing.
         """
 
-        b = board[0, :, :] + 2 * board[1, :, :] + 3 * board[2, :, :] + 4 * board[3, :, :]
-        # s = b.tostring()
-        # print(str(b))
-        return b.tostring()
+        return hash(board.tostring())

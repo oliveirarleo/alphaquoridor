@@ -5,9 +5,9 @@ import time
 import numpy as np
 from tqdm import tqdm
 
-sys.path.append('../../../')
+sys.path.append('../../')
 from utils import *
-from src.alphazero_general.NeuralNet import NeuralNet
+from alphazero_general.NeuralNet import NeuralNet
 
 import torch
 import torch.optim as optim
@@ -18,9 +18,9 @@ args = dotdict({
     'lr': 0.001,
     'dropout': 0.3,
     'epochs': 10,
-    'batch_size': 128,
+    'batch_size': 64,
     'cuda': torch.cuda.is_available(),
-    'num_channels': 512,
+    'num_channels': 256,
 })
 
 
@@ -80,7 +80,7 @@ class NNetWrapper(NeuralNet):
         board: np array with board
         """
         # timing
-        start = time.time()
+        # start = time.time()
 
         # preparing input
         board = torch.FloatTensor(board.astype(np.float64))
@@ -114,7 +114,7 @@ class NNetWrapper(NeuralNet):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
         filepath = os.path.join(folder, filename)
         if not os.path.exists(filepath):
-            raise Exception("No model in path {}".format(filepath))
+            raise ("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
         self.nnet.load_state_dict(checkpoint['state_dict'])

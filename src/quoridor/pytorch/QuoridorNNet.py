@@ -1,8 +1,6 @@
 import sys
 
 sys.path.append('..')
-from utils import *
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -37,7 +35,7 @@ class QuoridorNNet(nn.Module):
         self.fc4 = nn.Linear(512, 1)
 
     def forward(self, s):
-        # s: batch_size x board_x x board_y
+        #                                                           s: batch_size x board_x x board_y
         s = s.view(-1, 4, self.board_x, self.board_y)  # batch_size x 1 x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))  # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn2(self.conv2(s)))  # batch_size x num_channels x board_x x board_y
@@ -52,4 +50,5 @@ class QuoridorNNet(nn.Module):
         pi = self.fc3(s)  # batch_size x action_size
         v = self.fc4(s)  # batch_size x 1
 
-        return F.log_softmax(pi, dim=1), torch.tanh(v)
+        # return F.log_softmax(pi, dim=1), F.tanh(v)
+        return F.log_softmax(pi, dim=1), torch.tanh(v)  # new
