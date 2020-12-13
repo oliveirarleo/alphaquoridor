@@ -3,7 +3,7 @@ import os
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
-import QuoridorUtils
+
 from src.alphazero_general.Game import Game
 from .QuoridorLogic import QuoridorBoard
 
@@ -14,6 +14,9 @@ class QuoridorGame(Game):
         self.n = n
         self.board_len = 2 * self.n - 1
         self.action_size = 12 + 2 * (self.n - 1) ** 2
+
+    def __str__(self):
+        return 'quoridor_n'+str(self.n)+'_v0'
 
     def getInitBoard(self):
         """
@@ -28,7 +31,7 @@ class QuoridorGame(Game):
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return self.board_len, self.board_len
+        return self.board_len, self.board_len, 5
 
     def getActionSize(self):
         """
@@ -49,10 +52,9 @@ class QuoridorGame(Game):
             nextBoard: board after applying action
             nextPlayer: player who plays in the next turn (should be -player)
         """
-        quoridor_board = QuoridorBoard(self.n)
-        quoridor_board.setBoard(board)
-        next = quoridor_board.executeAction(player, action)
-        return (self.flipBoard(next), -player)
+        next_board = QuoridorBoard(self.n, board=board)
+        next_board.executeAction(player, action)
+        return next_board, -player
 
     def getValidActions(self, board, player):
         """
@@ -78,7 +80,7 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        return board.getGameEnded()
+        return board.getGameEnded(player)
 
     def getCanonicalForm(self, board, player):
         """
@@ -94,7 +96,8 @@ class QuoridorGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
-        return board.makeCanonical()
+        next_board = QuoridorBoard(self.n, board=board)
+        return next_board.makeCanonical(player)
 
     def getSymmetries(self, board, pi):
         """
@@ -107,7 +110,7 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        return [(board, pi)]
+        return [(board.getBoard(), pi)]
 
     def stringRepresentation(self, board):
         """
@@ -119,4 +122,7 @@ class QuoridorGame(Game):
                          Required by MCTS for hashing.
         """
 
-        return board.getHashable()
+        return board.getBoardHashable()
+
+    def display(self, board, name=None):
+        board.plot_board(name=name)

@@ -1,0 +1,5 @@
+/home/leleco/programas/clion-2020.3/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind
+-- Found pybind11: /usr/include (found version "2.6.0" )
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/cmake-build-debug

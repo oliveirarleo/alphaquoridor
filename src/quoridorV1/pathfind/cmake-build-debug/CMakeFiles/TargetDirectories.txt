@@ -1,0 +1,3 @@
+/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/cmake-build-debug/CMakeFiles/QuoridorUtils.dir

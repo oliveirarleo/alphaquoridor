@@ -5,7 +5,7 @@ from tqdm import tqdm
 log = logging.getLogger(__name__)
 
 
-class Arena():
+class Arena:
     """
     An Arena class where any 2 agents can be pit against each other.
     """
@@ -27,7 +27,7 @@ class Arena():
         self.game = game
         self.display = display
 
-    def playGame(self, verbose=False):
+    def playGame(self, verbose=False, name=None):
         """
         Executes one episode of a game.
 
@@ -46,7 +46,7 @@ class Arena():
             if verbose:
                 assert self.display
                 print("Turn ", str(it), "Player ", str(curPlayer))
-                self.display(board)
+                self.display(board, name=name+'_'+str(it))
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
 
             valids = self.game.getValidActions(self.game.getCanonicalForm(board, curPlayer), 1)
@@ -59,7 +59,8 @@ class Arena():
         if verbose:
             assert self.display
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
-            self.display(board)
+            self.display(board, name+'_over')
+        # print(it, curPlayer * self.game.getGameEnded(board, curPlayer))
         return curPlayer * self.game.getGameEnded(board, curPlayer)
 
     def playGames(self, num, verbose=False):
@@ -77,19 +78,20 @@ class Arena():
         oneWon = 0
         twoWon = 0
         draws = 0
-        for _ in tqdm(range(num), desc="Arena.playGames (1)"):
-            gameResult = self.playGame(verbose=verbose)
+        for i in tqdm(range(num), desc="Arena.playGames (1)"):
+            gameResult = self.playGame(verbose=verbose, name='game_'+str(i))
             if gameResult == 1:
                 oneWon += 1
             elif gameResult == -1:
                 twoWon += 1
             else:
                 draws += 1
+        log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (twoWon, oneWon, draws))
 
         self.player1, self.player2 = self.player2, self.player1
 
-        for _ in tqdm(range(num), desc="Arena.playGames (2)"):
-            gameResult = self.playGame(verbose=verbose)
+        for i in tqdm(range(num), desc="Arena.playGames (2)"):
+            gameResult = self.playGame(verbose=verbose, name='game_'+str(i))
             if gameResult == -1:
                 oneWon += 1
             elif gameResult == 1:

@@ -4,3 +4,6 @@ src/db.sqlite3
 /venv/
 __pycache__/
 migrations/
+models/
+build/
+cmake-build-debug/

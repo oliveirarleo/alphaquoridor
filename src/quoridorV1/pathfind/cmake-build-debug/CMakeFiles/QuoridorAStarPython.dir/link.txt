@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -Wextra -g  -shared  -o QuoridorAStarPython.cpython-38-x86_64-linux-gnu.so CMakeFiles/QuoridorAStarPython.dir/src/QuoridorAStarPython.cpp.o 

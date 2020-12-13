@@ -14,7 +14,7 @@ from alphazero_general.MCTS import MCTS
 log = logging.getLogger(__name__)
 
 
-class Coach():
+class Coach:
     """
     This class executes the self-play + learning. It uses the functions defined
     in Game and NeuralNet. args are specified in main.py.
@@ -125,10 +125,10 @@ class Coach():
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='best.pth.tar')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=str(self.game) + '_' + str(self.nnet)+'_best.pth.tar')
 
     def getCheckpointFile(self, iteration):
-        return str(self.game.__class__.__name__) + '_' + str(self.nnet.__class__.__name__) + '_' + 'checkpoint_' + str(iteration) + '.pth.tar'
+        return str(self.game) + '_' + str(self.nnet) + '_checkpoint_' + str(iteration) + '.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint
