@@ -1,89 +1,11 @@
 import sys
 import os
 
-import numpy as np
-
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 import QuoridorUtils
 from src.alphazero_general.Game import Game
 from .QuoridorLogic import QuoridorBoard
-
-
-def board_pretty(board, invert_yaxis=False, path=[]):
-    """
-    Simulator.visualize(path) # plot a path
-    Simulator.visualize(path_full, path_short) # plot two paths
-
-    path is a list for the trajectory. [x[0], y[0], x[1], y[1], ...]
-    """
-
-    fig_map, ax_map = plt.subplots(1, 1)
-
-    # plot retangle obstacles
-    for idx, x in np.ndenumerate(board[0, :, :]):
-        idx = (idx[1], idx[0])
-        if idx[0] % 2 == 1 or idx[1] % 2 == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='lightgray')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='darkred')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-
-    for idx, x in np.ndenumerate(board[1, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='darkblue')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-
-    for idx, x in np.ndenumerate(board[2, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='r')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-
-    for idx, x in np.ndenumerate(board[3, :, :]):
-        idx = (idx[1], idx[0])
-        if x == 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(idx, 1, 1,
-                                     linewidth=1, facecolor='b')
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-
-    points = list(zip(path, path[1:]))[::2]
-    for i, p in enumerate(points):
-        if i != 0 and i != len(points) - 1:
-            # Create a Rectangle patch
-            rect = patches.Rectangle(p, 1, 1,
-                                     linewidth=1, facecolor='g', alpha=0.5)
-            # Add the patch to the Axes
-            ax_map.add_patch(rect)
-
-    ax_map.set_aspect('equal')
-    ax_map.set_yticks(np.arange(0, 17, 2))
-    ax_map.set_xticks(np.arange(0, 17, 2))
-    ax_map.set_xlim([0, 17])
-    ax_map.set_ylim([0, 17])
-    if invert_yaxis:
-        ax_map.invert_yaxis()
-    plt.show()
 
 
 class QuoridorGame(Game):
@@ -99,7 +21,7 @@ class QuoridorGame(Game):
             startBoard: a representation of the board (ideally this is the form
                         that will be the input to your neural network)
         """
-        return QuoridorBoard(self.n).setInitBoard()
+        return QuoridorBoard(self.n)
 
     def getBoardSize(self):
         """
@@ -143,7 +65,7 @@ class QuoridorGame(Game):
                         moves that are valid from the current board and player,
                         0 for invalid moves
         """
-        return QuoridorUtils.GetValidMoves(board, player)
+        return board.getValidActions(player)
 
     def getGameEnded(self, board, player):
         """
@@ -156,11 +78,7 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        if np.any(board[2, self.board_len - 1, :]):
-            return 1
-        elif np.any(board[3, 0, :]):
-            return -1
-        return 0
+        return board.getGameEnded()
 
     def getCanonicalForm(self, board, player):
         """
@@ -176,21 +94,7 @@ class QuoridorGame(Game):
                             board as is. When the player is black, we can invert
                             the colors and return the board.
         """
-        if player == 1:
-            return board
-        else:
-            return self.flipBoard(board)
-
-    def flipBoard(self, board):
-        b = np.zeros(board.shape, dtype=int)
-        b[2, :, :] = np.array(board[3, :, :], copy=True)
-        b[3, :, :] = np.array(board[2, :, :], copy=True)
-        b[0, :, :] = np.array(board[1, :, :], copy=True)
-        b[1, :, :] = np.array(board[0, :, :], copy=True)
-
-        for i in range(4):
-            b[i, :, :] = np.flip(b[i, :, :], (0, 1))
-        return b
+        return board.makeCanonical()
 
     def getSymmetries(self, board, pi):
         """
@@ -215,4 +119,4 @@ class QuoridorGame(Game):
                          Required by MCTS for hashing.
         """
 
-        return hash(board.tostring())
+        return board.getHashable()
