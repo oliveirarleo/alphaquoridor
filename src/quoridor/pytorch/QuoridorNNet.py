@@ -9,12 +9,12 @@ import torch.nn.functional as F
 class QuoridorNNet(nn.Module):
     def __init__(self, game, args):
         # game params
-        self.board_x, self.board_y = game.getBoardSize()
+        self.board_x, self.board_y, self.board_z = game.getBoardSize()
         self.action_size = game.getActionSize()
         self.args = args
 
         super(QuoridorNNet, self).__init__()
-        self.conv1 = nn.Conv2d(5, args.num_channels, 3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(self.board_z, args.num_channels, 3, stride=1, padding=1)
         self.conv2 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1, padding=1)
         self.conv3 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
         self.conv4 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
@@ -35,8 +35,8 @@ class QuoridorNNet(nn.Module):
         self.fc4 = nn.Linear(512, 1)
 
     def forward(self, s):
-        #                                                           s: batch_size x board_x x board_y
-        s = s.view(-1, 5, self.board_x, self.board_y)  # batch_size x 1 x board_x x board_y
+        # s: batch_size x board_x x board_y
+        s = s.view(-1, self.board_z, self.board_x, self.board_y)  # batch_size x 1 x board_x x board_y
         s = F.relu(self.bn1(self.conv1(s)))  # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn2(self.conv2(s)))  # batch_size x num_channels x board_x x board_y
         s = F.relu(self.bn3(self.conv3(s)))  # batch_size x num_channels x (board_x-2) x (board_y-2)

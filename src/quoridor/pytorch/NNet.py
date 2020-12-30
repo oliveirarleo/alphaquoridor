@@ -20,14 +20,15 @@ args = dotdict({
     'epochs': 10,
     'batch_size': 64,
     'cuda': torch.cuda.is_available(),
-    'num_channels': 256,
+    'num_channels': 512,
 })
 
 
 class NNetWrapper(NeuralNet):
     def __init__(self, game):
+        super().__init__(game)
         self.nnet = qnnet(game, args)
-        self.board_x, self.board_y = game.getBoardSize()
+        self.board_x, self.board_y, self.board_z = game.getBoardSize()
         self.action_size = game.getActionSize()
 
         if args.cuda:
@@ -40,7 +41,7 @@ class NNetWrapper(NeuralNet):
         optimizer = optim.Adam(self.nnet.parameters())
 
         for epoch in range(args.epochs):
-            print('EPOCH ::: ' + str(epoch + 1))
+            # print('EPOCH ::: ' + str(epoch + 1))
             self.nnet.train()
             pi_losses = AverageMeter()
             v_losses = AverageMeter()
@@ -79,13 +80,11 @@ class NNetWrapper(NeuralNet):
         """
         board: np array with board
         """
-        # timing
-        # start = time.time()
 
         # preparing input
         board = torch.FloatTensor(board.getBoard().astype(np.float64))
         if args.cuda: board = board.contiguous().cuda()
-        board = board.view(5, self.board_x, self.board_y)
+        board = board.view(self.board_z, self.board_x, self.board_y)
         self.nnet.eval()
         with torch.no_grad():
             pi, v = self.nnet(board)

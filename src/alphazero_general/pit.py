@@ -2,7 +2,7 @@ from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQu
 from src.alphazero_general import Arena
 from src.alphazero_general.MCTS import MCTS
 from quoridor.QuoridorGame import QuoridorGame
-from quoridor.pytorch import NNetWrapper as NNet
+from quoridor.pytorch.NNet import NNetWrapper as NNet
 
 import numpy as np
 from utils import *
@@ -16,9 +16,9 @@ mini_othello = False  # Play in 6x6 instead of the normal 8x8.
 human_vs_cpu = True
 
 if mini_othello:
-    g = QuoridorGame(6)
+    g = QuoridorGame(5)
 else:
-    g = QuoridorGame(8)
+    g = QuoridorGame(9)
 
 # all players
 rp = RandomPlayer(g).play

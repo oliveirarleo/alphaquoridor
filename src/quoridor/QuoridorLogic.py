@@ -34,15 +34,16 @@ class QuoridorBoard:
             self.blue_board = np.zeros((self.board_len, self.board_len), np.int16)
             self.red_walls_board = np.zeros((self.board_len, self.board_len), np.int16)
             self.blue_walls_board = np.zeros((self.board_len, self.board_len), np.int16)
+            self.draw = np.zeros((self.board_len, self.board_len), np.int16)
 
             # red player
             self.red_position = (midpoint_red, 0)
-            self.red_walls = 10
+            self.red_walls = 2
             self.red_board[self.red_position[0], self.red_position[1]] = 1
 
             # blue player
             self.blue_position = (midpoint_blue, lastpoint)
-            self.blue_walls = 10
+            self.blue_walls = 2
             self.blue_board[self.blue_position[0], self.blue_position[1]] = 1
 
         self.actions = {
@@ -76,19 +77,19 @@ class QuoridorBoard:
             'hw': self.placeHorizontalWall,
         }
 
-        self.convert_action = [1, 0, 3, 2, 5, 4, 7, 6, 11, 10, 9,8]
+        self.convert_action = [1, 0, 3, 2, 5, 4, 7, 6, 11, 10, 9, 8]
         cvw = list(np.flip(np.arange(12, 12 + (self.n - 1) ** 2).reshape((self.n - 1, self.n - 1)), (0, 1)).ravel())
         chw = list(
             np.flip(np.arange(12 + (self.n - 1) ** 2, 12 + 2 * (self.n - 1) ** 2).reshape((self.n - 1, self.n - 1)),
                     (0, 1)).ravel())
         self.convert_action = self.convert_action + cvw + chw
 
-    def getGameEnded(self):
+    def getGameEnded(self, player):
         if self.red_position[1] == self.red_goal[1]:
-            return 1
+            return player
         elif self.blue_position[1] == self.blue_goal[1]:
-            return -1
-        elif self.getRepetitions() >= 3:
+            return -player
+        elif self.draw[0][0] == 1:
             return 1e-4
         return 0
 
@@ -98,6 +99,9 @@ class QuoridorBoard:
             self.history[s] += 1
         else:
             self.history[s] = 1
+
+        if self.history[s] > 2:
+            self.draw = np.ones((self.board_len, self.board_len))
 
     def getRepetitions(self):
         s = self.getBoardHashable()
@@ -111,7 +115,7 @@ class QuoridorBoard:
         board[1] = self.blue_walls_board
         board[2] = self.red_board
         board[3] = self.blue_board
-        board[4] = self.blue_board
+        board[4] = self.draw
         return board
 
     def getBoardHashable(self):
@@ -123,6 +127,7 @@ class QuoridorBoard:
         self.blue_board = np.array(board.blue_board, copy=True)
         self.red_walls_board = np.array(board.red_walls_board, copy=True)
         self.blue_walls_board = np.array(board.blue_walls_board, copy=True)
+        self.draw = np.array(board.draw, copy=True)
         self.red_position = board.red_position
         self.red_walls = board.red_walls
         self.blue_position = board.blue_position
@@ -159,6 +164,7 @@ class QuoridorBoard:
             opponent_y = self.blue_position[1]
             opponent_goal_x = self.blue_goal[0]
             opponent_goal_y = self.blue_goal[1]
+            walls = self.red_walls
         else:
             player_x = self.blue_position[0]
             player_y = self.blue_position[1]
@@ -168,10 +174,23 @@ class QuoridorBoard:
             opponent_y = self.red_position[1]
             opponent_goal_x = self.red_goal[0]
             opponent_goal_y = self.red_goal[1]
+            walls = self.blue_walls
 
-        return QuoridorUtils.GetValidActions(player_x, player_y, player_end_x, player_end_y,
-                                             opponent_x, opponent_y, opponent_goal_x, opponent_goal_y,
-                                             self.red_walls_board + self.blue_walls_board)
+        w = self.red_walls_board + self.blue_walls_board
+        pawn_actions = QuoridorUtils.GetValidPawnActions(player_x, player_y, opponent_x, opponent_y, w)
+        # print(pawn_actions)
+        # wall_acts = QuoridorUtils.getWallActions2(w, player_x, player_y, player_end_x, player_end_y,
+        #                                           opponent_x, opponent_y, opponent_goal_x, opponent_goal_y, walls)
+        # for i in range(2):
+        #     for j in range(self.n-1):
+        #         print(wall_acts[i][j])
+        #     print()
+        # for j in range(len(w)):
+        #     print(w[j])
+        # return QuoridorUtils.GetValidActions(player_x, player_y, player_end_x, player_end_y,
+        #                                      opponent_x, opponent_y, opponent_goal_x, opponent_goal_y,
+        #                                      self.red_walls_board + self.blue_walls_board, walls)
+        return pawn_actions + (self.n-1)*(self.n-1)*2*[0]
 
     def findPlayer(self, player):
         player_board = self.red_board if player == 1 else self.blue_board
@@ -212,9 +231,6 @@ class QuoridorBoard:
             player_board = self.blue_board
             self.blue_position = (x + dx, y + dy)
 
-            # dy = -dy
-            # dx = -dx
-
         player_board[x, y] = 0
         player_board[x + dx, y + dy] = 1
 
@@ -226,29 +242,9 @@ class QuoridorBoard:
             wall_board = self.blue_walls_board
             self.blue_walls -= 1
 
-            # boardsize = board.shape[1]-1
-            # y = boardsize-y
-            # x = boardsize-x
-
         wall_board[x, y] = 1
         wall_board[x, y + 1] = 1
         wall_board[x, y - 1] = 1
-
-    def piSymmetries(self, pi):
-        pi = copy.deepcopy(pi)
-        pi[0], pi[1] = pi[1], pi[0]
-        pi[2], pi[3] = pi[3], pi[2]
-        pi[4], pi[5] = pi[5], pi[4]
-        pi[6], pi[7] = pi[7], pi[6]
-        pi[8], pi[11] = pi[11], pi[8]
-        pi[9], pi[10] = pi[10], pi[9]
-
-        pi[12:12 + (self.n - 1) ** 2] = list(
-            np.flip(np.array(pi[12:12 + (self.n - 1) ** 2]).reshape((self.n - 1, self.n - 1)), (0, 1)).ravel())
-        pi[12 + (self.n - 1) ** 2:] = list(
-            np.flip(np.array(pi[12 + (self.n - 1) ** 2:]).reshape((self.n - 1, self.n - 1)), (0, 1)).ravel())
-
-        return pi
 
     def placeHorizontalWall(self, player, x, y):
         if player == 1:
@@ -265,6 +261,22 @@ class QuoridorBoard:
         wall_board[x, y] = 1
         wall_board[x + 1, y] = 1
         wall_board[x - 1, y] = 1
+
+    def piSymmetries(self, pi):
+        pi = copy.deepcopy(pi)
+        pi[0], pi[1] = pi[1], pi[0]
+        pi[2], pi[3] = pi[3], pi[2]
+        pi[4], pi[5] = pi[5], pi[4]
+        pi[6], pi[7] = pi[7], pi[6]
+        pi[8], pi[11] = pi[11], pi[8]
+        pi[9], pi[10] = pi[10], pi[9]
+
+        pi[12:12 + (self.n - 1) ** 2] = list(
+            np.flip(np.array(pi[12:12 + (self.n - 1) ** 2]).reshape((self.n - 1, self.n - 1)), (0, 1)).ravel())
+        pi[12 + (self.n - 1) ** 2:] = list(
+            np.flip(np.array(pi[12 + (self.n - 1) ** 2:]).reshape((self.n - 1, self.n - 1)), (0, 1)).ravel())
+
+        return pi
 
     def plot_board(self, invert_yaxis=False, path=None):
         if path is None:

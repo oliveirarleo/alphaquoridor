@@ -175,7 +175,7 @@ inline int QuoridorMapSearchNode::GetMap(int x, int y)
         return INF;
     }
 
-    return map.world_map[y][x];
+    return map.world_map[x][y];
 }
 
 

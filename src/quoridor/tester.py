@@ -3,6 +3,9 @@ import os
 
 import numpy as np
 import logging
+
+from tqdm import tqdm
+
 from utils import dotdict
 import coloredlogs
 
@@ -99,11 +102,11 @@ class QuoridorEngineTester:
         print()
 
     @staticmethod
-    def printActionType(game, action, player):
+    def printActionType(game, board, action, player):
         if player == 1:
-            ptype = 'red'
+            ptype = '--Red'
         else:
-            ptype = 'blu'
+            ptype = '--Blu'
         n_walls = game.n - 1
         pawn_actions = 12
         vwall_actions = pawn_actions + n_walls ** 2
@@ -113,46 +116,78 @@ class QuoridorEngineTester:
         elif action < vwall_actions:
             print(ptype, 'VWall x:', int((action - pawn_actions) / n_walls), 'y:',
                   (action - pawn_actions) % n_walls)
+            x = int((action - pawn_actions) / n_walls) * 2 +1
+            y = ((action - pawn_actions) % n_walls) * 2 +1
+            print(QuoridorUtils.pathExistsForPlayers((board.red_walls_board + board.blue_walls_board),
+                                                     board.red_position[0], board.red_position[1], board.red_goal[0],
+                                                     board.red_goal[1],
+                                                     board.blue_position[0], board.blue_position[1], board.blue_goal[0],
+                                                     board.blue_goal[1],
+                                                     x, y, True))
         else:
             print(ptype, 'HWall x:', int((action - vwall_actions) / n_walls), 'y:',
                   (action - vwall_actions) % n_walls)
+            x = int((action - vwall_actions) / n_walls) * 2 + 1
+            y = ((action - vwall_actions) % n_walls) * 2 + 1
+            print(QuoridorUtils.pathExistsForPlayers((board.red_walls_board + board.blue_walls_board),
+                                                     board.red_position[0], board.red_position[1], board.red_goal[0],
+                                                     board.red_goal[1],
+                                                     board.blue_position[0], board.blue_position[1], board.blue_goal[0],
+                                                     board.blue_goal[1],
+                                                     x, y, True))
 
 
 def main():
-    # game = QuoridorGame(3)
+    # game = QuoridorGame(5)
     # board = game.getInitBoard()
-    # board, player = game.getNextState(board, -1, 1)
+    # board, player = game.getNextState(board, 1, 0)
     # board, player = QuoridorEngineTester.placeWall(game, board, 1, 0, 1, False)
-    # QuoridorEngineTester.printValidActions(game, board, 1)
+    # # QuoridorEngineTester.printValidActions(game, board, 1)
     # # board, player = game.getNextState(board, -1, 3)
-    # board.plot_board()
+    # path, len = QuoridorUtils.FindPath(board.blue_position, board.blue_goal, (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len)
+    # board.plot_board(path=path)
+    # print(path)
+    # print(board.blue_position)
+    # print(board.blue_goal)
+    # print(QuoridorUtils.PathExists(board.blue_position[0], board.blue_position[1],
+    #                                board.blue_goal[0], board.blue_goal[1], (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len))
+    # print(np.rot90(board.red_walls_board+board.blue_walls_board))
 
-    game = QuoridorGame(3)
+    game = QuoridorGame(5)
     ww = 0
     bw = 0
-    for j in range(1):
+    for _ in tqdm(range(1), desc="Self Play"):
         board = game.getInitBoard()
         i = 1
-        player = 1
         while True:
             # print(i)
-            flip = (i%2==0)
-            board.plot_board(invert_yaxis=flip)
+            flip = i%2==0
+            path, lendd = QuoridorUtils.FindPath(board.blue_position, board.blue_goal,
+                                               (board.red_walls_board + board.blue_walls_board), game.board_len,
+                                               game.board_len)
+            board.plot_board(path=path)
             i += 1
             valid_actions = game.getValidActions(board, 1)
             pi = [a / sum(valid_actions) for a in valid_actions]
             action = np.random.choice(len(valid_actions), p=pi)
-
-            QuoridorEngineTester.printActionType(game, action, 1)
+            QuoridorEngineTester.printActionType(game, board, action, 1)
             # print(board.red_position)
             # print(board.blue_position)
             # QuoridorEngineTester.printValidActions(game, board, 1)
 
             board, player = game.getNextState(board, 1, action)
+
+            path, lendd = QuoridorUtils.FindPath(board.blue_position, board.blue_goal,
+                                                 (board.red_walls_board + board.blue_walls_board), game.board_len,
+                                                 game.board_len)
+            board.plot_board(path=path)
+            # print(QuoridorUtils.PathExists(board.blue_position[0], board.blue_position[1],
+            #                                board.blue_goal[0], board.blue_goal[1], (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len))
+            #
             board = game.getCanonicalForm(board, player)
 
             if game.getGameEnded(board, 1) != 0:
-                print('GAME ENDED', game.getGameEnded(board, 1))
+                # print('GAME ENDED', game.getGameEnded(board, 1))
                 break
         # print(i)
         if i % 2:

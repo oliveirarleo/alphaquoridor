@@ -8,7 +8,7 @@ EPS = 1e-8
 log = logging.getLogger(__name__)
 
 
-class MCTS():
+class MCTS:
     """
     This class handles the MCTS tree.
     """
@@ -73,8 +73,8 @@ class MCTS():
 
         s = self.game.stringRepresentation(canonicalBoard)
 
-        # if s not in self.Es:
-        self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
+        if s not in self.Es:
+            self.Es[s] = self.game.getGameEnded(canonicalBoard, 1)
         if self.Es[s] != 0:
             # terminal node
             return -self.Es[s]

@@ -274,7 +274,7 @@ void getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
             }
                 // JN
                 // If there is a square and there is no player there
-            else if ((player_y + 4 < board_size) && !(player_x == opponent_x && (player_y + 4) == opponent_y)) {
+            else if (player_y + 4 < board_size) {
                 // Jump NORTH
                 actions[JN] = 1;
             }
@@ -305,7 +305,7 @@ void getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
             }
                 // JS
                 // If there is a square and there is no player there
-            else if ((player_y - 4 >= 0) && !(player_x == opponent_x && (player_y - 4) == opponent_y)) {
+            else if (player_y - 4 >= 0) {
                 // Jump SOUTH
                 actions[JS] = 1;
             }
@@ -337,7 +337,7 @@ void getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
             }
                 // JE
                 // If there is a square and there is no player there
-            else if ((player_x + 4 < board_size) && !((player_x + 4) == opponent_x && player_y == opponent_y)) {
+            else if (player_x + 4 < board_size) {
                 // Jump EAST
                 actions[JE] = 1;
             }
@@ -367,8 +367,8 @@ void getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
                 }
             }
                 // JW
-                // If there is a square and there is no player there
-            else if ((player_y - 4 >= 0) && !((player_x - 4) == opponent_x && player_y == opponent_y)) {
+                // If there is a square
+            else if (player_x - 4 >= 0) {
                 // Jump WEST
                 actions[JW] = 1;
             }
@@ -387,33 +387,27 @@ bool pathExistsForPlayers(std::vector<std::vector<int>> &walls,
 
 //    Insert wall
     if (is_vertical) {
-        walls[wall_y][wall_x] = 1;
-        walls[wall_y + 1][wall_x] = 1;
-        walls[wall_y - 1][wall_x] = 1;
+        walls[wall_x][wall_y] = 1;
+        walls[wall_x][wall_y + 1] = 1;
+        walls[wall_x][wall_y - 1] = 1;
     } else {
-        walls[wall_y][wall_x] = 1;
-        walls[wall_y][wall_x + 1] = 1;
-        walls[wall_y][wall_x - 1] = 1;
+        walls[wall_x][wall_y] = 1;
+        walls[wall_x + 1][wall_y] = 1;
+        walls[wall_x - 1][wall_y] = 1;
     }
-//    std::vector<int> lin_walls(board_size * board_size);
-//    for (int i = 0; i < board_size; i++) {
-//        for (int j = 0; j < board_size; j++) {
-//            lin_walls[i * board_size + j] = walls[i][j];
-//        }
-//    }
 
     bool result = PathExists(player_x, player_y, player_end_x, player_end_y, walls, board_size, board_size) &&
                   PathExists(opponent_x, opponent_y, opponent_end_x, opponent_end_y, walls, board_size, board_size);
 
 //    Remove wall
     if (is_vertical) {
-        walls[wall_y][wall_x] = 0;
-        walls[wall_y + 1][wall_x] = 0;
-        walls[wall_y - 1][wall_x] = 0;
+        walls[wall_x][wall_y] = 0;
+        walls[wall_x][wall_y + 1] = 0;
+        walls[wall_x][wall_y - 1] = 0;
     } else {
-        walls[wall_y][wall_x] = 0;
-        walls[wall_y][wall_x + 1] = 0;
-        walls[wall_y][wall_x - 1] = 0;
+        walls[wall_x][wall_y] = 0;
+        walls[wall_x + 1][wall_y] = 0;
+        walls[wall_x - 1][wall_y] = 0;
     }
     return result;
 }
@@ -421,7 +415,10 @@ bool pathExistsForPlayers(std::vector<std::vector<int>> &walls,
 
 void getWallActions(std::vector<std::vector<int>> &walls,
                     int player_x, int player_y, int player_end_x, int player_end_y,
-                    int opponent_x, int opponent_y, int opponent_end_x, int opponent_end_y, std::vector<int> &actions) {
+                    int opponent_x, int opponent_y, int opponent_end_x, int opponent_end_y, std::vector<int> &actions,
+                    int num_walls) {
+    if (num_walls <= 0)
+        return;
     int board_size = (int) walls.size();
     int n = (board_size + 1) / 2 - 1;
     int pawn_actions = 12;
@@ -442,7 +439,10 @@ void getWallActions(std::vector<std::vector<int>> &walls,
                     if ((walls[i + 1][j] == 1) || (walls[i - 1][j] == 1))
                         connections += 1;
 
-                    if (connections < 2) {
+                    if (connections < 2 || pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y,
+                                                                opponent_x, opponent_y, opponent_end_x, opponent_end_y,
+                                                                i, j, true)) {
+//                        if (connections < 2){
                         actions[pawn_actions + i / 2 * n + j / 2] = 1;
                     }
 
@@ -460,7 +460,10 @@ void getWallActions(std::vector<std::vector<int>> &walls,
                     if ((walls[i][j + 1] == 1) || (walls[i][j - 1] == 1))
                         connections += 1;
 
-                    if (connections < 2) {
+                    if (connections < 2 || pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y,
+                                                                opponent_x, opponent_y, opponent_end_x, opponent_end_y,
+                                                                i, j, false)) {
+//                    if (connections < 2){
                         actions[vwall_actions + i / 2 * n + j / 2] = 1;
                     }
 
@@ -469,14 +472,85 @@ void getWallActions(std::vector<std::vector<int>> &walls,
 
         }
     }
+}
 
+std::vector<std::vector<std::vector<int>>> getWallActions2(std::vector<std::vector<int>> &walls,
+                                                           int player_x, int player_y, int player_end_x,
+                                                           int player_end_y,
+                                                           int opponent_x, int opponent_y, int opponent_end_x,
+                                                           int opponent_end_y, int num_walls) {
+
+    int board_size = (int) walls.size();
+    int n = (board_size + 1) / 2 - 1;
+    std::vector<std::vector<std::vector<int>>> actions(n,
+                                                       std::vector<std::vector<int>>(n,
+                                                                                     std::vector<int>(n, 0)));
+    if (num_walls <= 0)
+        return actions;
+
+    int vwall_idx = 0;
+    int hwall_idx = 1;
+    for (int i = 1; i < board_size; i += 2) {
+        for (int j = 1; j < board_size; j += 2) {
+            if (walls[i][j] == 0) {
+                // Check vwall
+                if ((walls[i][j + 1] == 0) && (walls[i][j - 1] == 0)) {
+
+                    int connections = 0;
+                    if ((j + 3 >= board_size) || (walls[i][j + 3] == 1) || (walls[i + 1][j + 2] == 1) ||
+                        (walls[i - 1][j + 2] == 1))
+                        connections += 1;
+                    if ((j - 3 < 0) || (walls[i][j - 3] == 1) || (walls[i + 1][j - 2] == 1) ||
+                        (walls[i - 1][j - 2] == 1))
+                        connections += 1;
+                    if ((walls[i + 1][j] == 1) || (walls[i - 1][j] == 1))
+                        connections += 1;
+
+                    if (connections < 2 || pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y,
+                                                                opponent_x, opponent_y, opponent_end_x, opponent_end_y,
+                                                                i, j, true)) {
+                        actions[vwall_idx][i/2][j/2] = 1;
+                    }
+                }
+                // Check hwall
+                if ((walls[i + 1][j] == 0) && (walls[i - 1][j] == 0)) {
+                    int connections = 0;
+                    if ((i + 3 >= board_size) || (walls[i + 3][j] == 1) || (walls[i + 2][j + 1] == 1) ||
+                        (walls[i + 2][j - 1] == 1))
+                        connections += 1;
+                    if ((i - 3 < 0) || (walls[i - 3][j] == 1) || (walls[i - 2][j + 1] == 1) ||
+                        (walls[i - 2][j - 1] == 1))
+                        connections += 1;
+                    if ((walls[i][j + 1] == 1) || (walls[i][j - 1] == 1))
+                        connections += 1;
+
+                    if (connections < 2 || pathExistsForPlayers(walls, player_x, player_y, player_end_x, player_end_y,
+                                                                opponent_x, opponent_y, opponent_end_x, opponent_end_y,
+                                                                i, j, false)) {
+                        actions[hwall_idx][i/2][j/2] = 1;
+                    }
+                }
+            }
+        }
+    }
+    return actions;
+}
+
+
+inline std::vector<int> GetValidPawnActions(int player_x, int player_y,
+                                            int opponent_x, int opponent_y,
+                                            std::vector<std::vector<int>> &walls) {
+    std::vector<int> actions(12, 0);
+//    Get Pawn actions
+    getPawnActions(player_x, player_y, opponent_x, opponent_y, walls, actions);
+    return actions;
 }
 
 
 inline std::vector<int> GetValidActions(
         int player_x, int player_y, int player_end_x, int player_end_y,
         int opponent_x, int opponent_y, int opponent_end_x, int opponent_end_y,
-        std::vector<std::vector<int>> &walls) {
+        std::vector<std::vector<int>> &walls, int num_walls) {
 
     int board_size = (int) walls[0].size();
     int n = (board_size + 1) / 2;
@@ -489,7 +563,7 @@ inline std::vector<int> GetValidActions(
 //    Get Wall actions
     getWallActions(walls,
                    player_x, player_y, player_end_x, player_end_y,
-                   opponent_x, opponent_y, opponent_end_x, opponent_end_y, actions);
+                   opponent_x, opponent_y, opponent_end_x, opponent_end_y, actions, num_walls);
 
     return actions;
 }
@@ -499,6 +573,9 @@ inline PYBIND11_MODULE(QuoridorUtils, module) {
     module.doc() = "Python wrapper of AStar c++ implementation";
 
     module.def("PathExists", &PathExists, "Check if path exists");
+    module.def("pathExistsForPlayers", &pathExistsForPlayers, "Check if path exists");
     module.def("FindPath", &FindPath, "Find a collision-free path");
     module.def("GetValidActions", &GetValidActions, "");
+    module.def("getWallActions2", &getWallActions2, "");
+    module.def("GetValidPawnActions", &GetValidPawnActions, "");
 }

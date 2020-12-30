@@ -28,7 +28,7 @@ class QuoridorGame(Game):
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return self.board_len, self.board_len
+        return self.board_len, self.board_len, 5
 
     def getActionSize(self):
         """
@@ -77,7 +77,7 @@ class QuoridorGame(Game):
                small non-zero value for draw.
 
         """
-        return board.getGameEnded()
+        return board.getGameEnded(player)
 
     def getCanonicalForm(self, board, player):
         """
@@ -107,10 +107,10 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        bs = QuoridorBoard(self.n, board)
-        bs.flipBoard()
-        pi2 = bs.piSymmetries(pi)
-        return [(board.getBoard(), pi), (bs.getBoard(), pi2)]
+        # bs = QuoridorBoard(self.n, board)
+        # bs.flipBoard()
+        # pi2 = bs.piSymmetries(pi)
+        return [(board.getBoard(), pi)]
 
     def stringRepresentation(self, board):
         """

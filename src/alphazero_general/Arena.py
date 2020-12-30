@@ -5,7 +5,7 @@ from tqdm import tqdm
 log = logging.getLogger(__name__)
 
 
-class Arena():
+class Arena:
     """
     An Arena class where any 2 agents can be pit against each other.
     """
@@ -60,6 +60,7 @@ class Arena():
             assert self.display
             print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board)
+        # print(it, curPlayer * self.game.getGameEnded(board, curPlayer))
         return curPlayer * self.game.getGameEnded(board, curPlayer)
 
     def playGames(self, num, verbose=False):
@@ -85,6 +86,7 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
+        log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (twoWon, oneWon, draws))
 
         self.player1, self.player2 = self.player2, self.player1
 
