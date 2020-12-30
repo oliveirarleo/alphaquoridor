@@ -15,6 +15,9 @@ class QuoridorGame(Game):
         self.board_len = 2 * self.n - 1
         self.action_size = 12 + 2 * (self.n - 1) ** 2
 
+    def __str__(self):
+        return 'quoridor_n'+str(self.n)+'_v0_'
+
     def getInitBoard(self):
         """
         Returns:
@@ -107,9 +110,6 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        # bs = QuoridorBoard(self.n, board)
-        # bs.flipBoard()
-        # pi2 = bs.piSymmetries(pi)
         return [(board.getBoard(), pi)]
 
     def stringRepresentation(self, board):

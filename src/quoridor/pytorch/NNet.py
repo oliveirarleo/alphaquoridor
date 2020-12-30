@@ -34,6 +34,9 @@ class NNetWrapper(NeuralNet):
         if args.cuda:
             self.nnet.cuda()
 
+    def __str__(self):
+        return 'nnetv0_torch'
+
     def train(self, examples):
         """
         examples: list of examples, each example is of form (board, pi, v)
@@ -113,7 +116,7 @@ class NNetWrapper(NeuralNet):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
         filepath = os.path.join(folder, filename)
         if not os.path.exists(filepath):
-            raise ("No model in path {}".format(filepath))
+            raise Exception("No model in path {}".format(filepath))
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
         self.nnet.load_state_dict(checkpoint['state_dict'])

@@ -36,14 +36,15 @@ class QuoridorBoard:
             self.blue_walls_board = np.zeros((self.board_len, self.board_len), np.int16)
             self.draw = np.zeros((self.board_len, self.board_len), np.int16)
 
+            num_walls = (self.n+1)**2//10
             # red player
             self.red_position = (midpoint_red, 0)
-            self.red_walls = 2
+            self.red_walls = num_walls
             self.red_board[self.red_position[0], self.red_position[1]] = 1
 
             # blue player
             self.blue_position = (midpoint_blue, lastpoint)
-            self.blue_walls = 2
+            self.blue_walls = num_walls
             self.blue_board[self.blue_position[0], self.blue_position[1]] = 1
 
         self.actions = {
@@ -176,8 +177,10 @@ class QuoridorBoard:
             opponent_goal_y = self.red_goal[1]
             walls = self.blue_walls
 
-        w = self.red_walls_board + self.blue_walls_board
-        pawn_actions = QuoridorUtils.GetValidPawnActions(player_x, player_y, opponent_x, opponent_y, w)
+        # w = self.red_walls_board + self.blue_walls_board
+        # pawn_actions = QuoridorUtils.GetValidPawnActions(player_x, player_y, opponent_x, opponent_y, w)
+        # return pawn_actions + (self.n - 1) * (self.n - 1) * 2 * [0]
+
         # print(pawn_actions)
         # wall_acts = QuoridorUtils.getWallActions2(w, player_x, player_y, player_end_x, player_end_y,
         #                                           opponent_x, opponent_y, opponent_goal_x, opponent_goal_y, walls)
@@ -187,10 +190,11 @@ class QuoridorBoard:
         #     print()
         # for j in range(len(w)):
         #     print(w[j])
-        # return QuoridorUtils.GetValidActions(player_x, player_y, player_end_x, player_end_y,
-        #                                      opponent_x, opponent_y, opponent_goal_x, opponent_goal_y,
-        #                                      self.red_walls_board + self.blue_walls_board, walls)
-        return pawn_actions + (self.n-1)*(self.n-1)*2*[0]
+
+        return QuoridorUtils.GetValidActions(player_x, player_y, player_end_x, player_end_y,
+                                             opponent_x, opponent_y, opponent_goal_x, opponent_goal_y,
+                                             self.red_walls_board + self.blue_walls_board, walls)
+
 
     def findPlayer(self, player):
         player_board = self.red_board if player == 1 else self.blue_board
