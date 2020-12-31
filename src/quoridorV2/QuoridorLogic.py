@@ -170,7 +170,6 @@ class QuoridorBoard:
         self.addToHistory()
         pawn_moves = 12
         vertical_wall_moves = pawn_moves + (self.n - 1) ** 2
-        print('Player', player)
         if player == -1:
             action = self.convert_action[action]
 
@@ -183,8 +182,6 @@ class QuoridorBoard:
         elif pawn_moves <= action < vertical_wall_moves:
             x = int((action - pawn_moves) / (self.n - 1))
             y = int((action - pawn_moves) % (self.n - 1))
-            print(action - pawn_moves)
-            print(x, y)
             self.actions['vw'](player, x, y)
 
         # Horizontal Walls
