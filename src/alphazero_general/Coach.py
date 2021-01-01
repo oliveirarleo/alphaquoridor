@@ -114,8 +114,11 @@ class Coach:
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                          lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
+            arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
+                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)),
+                          self.game)
+            # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
+            #               lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
             pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
@@ -125,7 +128,8 @@ class Coach:
             else:
                 log.info('ACCEPTING NEW MODEL')
                 self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=self.getCheckpointFile(i))
-                self.nnet.save_checkpoint(folder=self.args.checkpoint, filename=str(self.game) + '_' + str(self.nnet)+'_best.pth.tar')
+                self.nnet.save_checkpoint(folder=self.args.checkpoint,
+                                          filename=str(self.game) + '_' + str(self.nnet) + '_best.pth.tar')
 
     def getCheckpointFile(self, iteration):
         return str(self.game) + '_' + str(self.nnet) + '_checkpoint_' + str(iteration) + '.pth.tar'

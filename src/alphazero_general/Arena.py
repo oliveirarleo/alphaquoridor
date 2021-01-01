@@ -91,7 +91,7 @@ class Arena:
         self.player1, self.player2 = self.player2, self.player1
 
         for i in tqdm(range(num), desc="Arena.playGames (2)"):
-            gameResult = self.playGame(verbose=verbose, name='game_'+str(i))
+            gameResult = self.playGame(verbose=verbose, name='game_'+str(i+num))
             if gameResult == -1:
                 oneWon += 1
             elif gameResult == 1:

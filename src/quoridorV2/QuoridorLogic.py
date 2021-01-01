@@ -1,11 +1,15 @@
 import copy
 import os
+import sys
 
 import numpy as np
 from functools import partial
 
 from matplotlib import patches
 import matplotlib.pyplot as plt
+
+sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
+import QuoridorUtils
 
 
 class QuoridorBoard:
@@ -149,7 +153,6 @@ class QuoridorBoard:
         return self
 
     def getValidActions(self, player):
-        pass
         # red(x,y) hw bloqueia N ->     (x-1,y)     (x,y)
         # red(x,y) hw bloqueia NN ->    (x-1,y+1)   (x,y+1)
         # red(x,y) vw bloqueia NE ->    (x,y)       (x,y+1)
@@ -165,6 +168,14 @@ class QuoridorBoard:
 
         # red(x,y) vw bloqueia W ->     (x-1,y-1)   (x-1,y)
         # red(x,y) vw bloqueia WW ->    (x-2,y-1)   (x-2,y)
+        if player == 1:
+            return QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
+                                         self.blue_position[0], self.blue_position[1],
+                                         self.v_walls, self.h_walls)
+        else:
+            return QuoridorUtils.getPawnActions(self.blue_position[0], self.blue_position[1],
+                                         self.red_position[0], self.red_position[1],
+                                         self.v_walls, self.h_walls)
 
     def executeAction(self, player, action):
         self.addToHistory()
@@ -273,7 +284,8 @@ class QuoridorBoard:
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):
             if i != 0 and i != len(points) - 1:
-                rect = patches.Rectangle(p, 1, 1, linewidth=0, facecolor='tab:green', alpha=0.5)
+                p = (float(p[0])*2, float(p[1])*2)
+                rect = patches.Rectangle(p, 1, 1, facecolor='tab:green', alpha=0.5)
                 ax_map.add_patch(rect)
 
         ax_map.set_aspect('equal')
@@ -281,6 +293,7 @@ class QuoridorBoard:
         ax_map.set_xticks(np.arange(0, board_len, 1))
         ax_map.set_xlim([0, board_len])
         ax_map.set_ylim([0, board_len])
+
         if invert_yaxis:
             ax_map.invert_yaxis()
             ax_map.invert_xaxis()

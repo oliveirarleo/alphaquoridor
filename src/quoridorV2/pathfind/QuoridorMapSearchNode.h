@@ -19,6 +19,17 @@
 
 const int INF = std::numeric_limits<int>::max();
 
+
+// If is blocked North of player
+inline bool hasHWN(const std::vector<std::vector<int>> &hwalls, int x, int y, int board_size) {
+    return (y >= board_size) || (y<0) || (x < board_size && hwalls[x][y] == 1) || (x > 0 && hwalls[x-1][y] == 1);
+}
+
+// If is blocked East of player
+inline bool hasVWE(const std::vector<std::vector<int>> &vwalls, int x, int y, int board_size) {
+    return (x >= board_size) || (x<0) || (y < board_size && vwalls[x][y] == 1) || (y > 0 && vwalls[x][y-1] == 1);
+}
+
 class QuoridorMapSearchNode
 {
 public:
@@ -50,12 +61,10 @@ bool QuoridorMapSearchNode::IsSameState( QuoridorMapSearchNode &rhs )
 
     // same state in a maze search is simply when (x,y) are the same
     if( (x == rhs.x) &&
-        (y == rhs.y) )
-    {
+        (y == rhs.y) ) {
         return true;
     }
-    else
-    {
+    else {
         return false;
     }
 
@@ -74,19 +83,12 @@ void QuoridorMapSearchNode::PrintNodeInfo()
 
 float QuoridorMapSearchNode::GoalDistanceEstimate( QuoridorMapSearchNode &nodeGoal )
 {
-    if (nodeGoal.x == 0 || nodeGoal.x == map.map_width-1)
-    {
-        return abs(x - nodeGoal.x);
-    }
     return abs(y - nodeGoal.y);
 }
 
 bool QuoridorMapSearchNode::IsGoal( QuoridorMapSearchNode &nodeGoal )
 {
-    if ((nodeGoal.x == 0 || nodeGoal.x == map.map_width-1) && x == nodeGoal.x)
-    {
-        return true;
-    } else if ((nodeGoal.y == 0 || nodeGoal.y == map.map_height-1) && y == nodeGoal.y)
+    if (y == nodeGoal.y)
     {
         return true;
     }
@@ -113,40 +115,36 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
     // QuoridorMapSearchNode NewNode;
 
     // push each possible move except allowing the search to go backwards
-
-    if( (GetMap( x-1, y ) < wall)
-        && !((parent_x == x-2) && (parent_y == y))
-        ) 
+    // NORTH
+    if(!hasHWN(map.hwalls, x, y, map.map_width)
+        && !((parent_x == x) && (parent_y == y+1)))
     {
-        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x-2, y, map );
+        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y+1, map );
+        astarsearch->AddSuccessor( NewNode );
+    }
+
+    // SOUTH
+    if( !hasHWN(map.hwalls, x, y-1, map.map_width)
+        && !((parent_x == x) && (parent_y == y-1)))
+    {
+        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y-1, map );
+        astarsearch->AddSuccessor( NewNode );
+    }
+
+    // EAST
+    if( !hasVWE(map.vwalls, x, y, map.map_width)
+        && !((parent_x == x+1) && (parent_y == y)))
+    {
+        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x+1, y, map );
         astarsearch->AddSuccessor( NewNode );
     }	
-
-    if( (GetMap( x, y-1 ) < wall)
-        && !((parent_x == x) && (parent_y == y-2))
-        ) 
+    // WEST
+    if( !hasVWE(map.vwalls, x-1, y, map.map_width)
+        && !((parent_x == x-1) && (parent_y == y)))
     {
-        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y-2, map );
-        astarsearch->AddSuccessor( NewNode );
-    }	
-
-    if( (GetMap( x+1, y ) < wall)
-        && !((parent_x == x+2) && (parent_y == y))
-        ) 
-    {
-        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x+2, y, map );
-        astarsearch->AddSuccessor( NewNode );
-    }	
-
-        
-    if( (GetMap( x, y+1 ) < wall)
-        && !((parent_x == x) && (parent_y == y+2))
-        )
-    {
-        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y+2, map );
-        astarsearch->AddSuccessor( NewNode );
-    }	
-
+        QuoridorMapSearchNode NewNode = QuoridorMapSearchNode(x-1, y, map);
+        astarsearch->AddSuccessor(NewNode);
+    }
     return true;
 }
 
@@ -156,26 +154,26 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
 
 float QuoridorMapSearchNode::GetCost( QuoridorMapSearchNode &successor )
 {
-    int next_node = GetMap( successor.x, successor.y );
-    if (next_node >= 1)
-        return INF;
+//    int next_node = GetMap( successor.x, successor.y );
+//    if (next_node >= 1)
+//        return INF;
     return 1.0;
 }
 
 
-inline int QuoridorMapSearchNode::GetMap(int x, int y)
-{
-    if( x < 0 ||
-        x >= map.map_width ||
-            y < 0 ||
-            y >= map.map_height
-        )
-    {
-        return INF;
-    }
-
-    return map.world_map[x][y];
-}
+//inline int QuoridorMapSearchNode::GetMap(int x, int y)
+//{
+//    if( x < 0 ||
+//        x >= map.map_width ||
+//            y < 0 ||
+//            y >= map.map_height
+//        )
+//    {
+//        return INF;
+//    }
+//
+//    return map.world_map[x][y];
+//}
 
 
 #endif

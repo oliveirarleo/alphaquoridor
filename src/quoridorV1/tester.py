@@ -1,28 +1,19 @@
 import sys
 import os
-from functools import partial
 
 import numpy as np
 import logging
 
-from tqdm import tqdm
-
 from alphazero_general.Arena import Arena
 from utils import dotdict
-import coloredlogs
-
-from quoridor.pytorch.NNet import NNetWrapper as nn
-from quoridor.QuoridorGame import QuoridorGame as Game
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 import QuoridorUtils
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 
 from alphazero_general.MCTS import MCTS
 
-from quoridor.pytorch.NNet import NNetWrapper as nn
-from quoridor.QuoridorGame import QuoridorGame as Game, QuoridorGame
+from quoridorV1.pytorch.NNet import NNetWrapper as nn
+from quoridorV1.QuoridorGame import QuoridorGame as Game, QuoridorGame
 
 log = logging.getLogger(__name__)
 
@@ -150,9 +141,11 @@ def main():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 40,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
-        'cpuct': 1,
+        'cpuct': 2.5,
+        'cpuct_base': 19652,
+        'cpuct_mult': 2,
 
         'checkpoint': './temp/',
         'load_model': False,
@@ -161,20 +154,20 @@ def main():
 
     })
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
     pnet = nn(g)
 
-    nnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
-    pnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
+    nnet.load_checkpoint(folder='/home/leleco/proj/pfg/alphaquoridor/pretrained_models/quoridor/v1_n5/', filename='quoridor_n5_v1_nnetv0_torch_best.pth.tar')
+    pnet.load_checkpoint(folder='/home/leleco/proj/pfg/alphaquoridor/pretrained_models/quoridor/v1_n5/', filename='quoridor_n5_v1_nnetv0_torch_best.pth.tar')
 
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
     log.info('PITTING AGAINST PREVIOUS VERSION')
-    arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                  lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), g, g.display)
+    arena = Arena(lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
+                  lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=1)), g, g.display)
     pwins, nwins, draws = arena.playGames(4, verbose=True)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))

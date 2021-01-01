@@ -103,15 +103,17 @@ class MCTS:
         valids = self.Vs[s]
         cur_best = -float('inf')
         best_act = -1
-
         # pick the action with the highest upper confidence bound
         for a in range(self.game.getActionSize()):
             if valids[a]:
                 if (s, a) in self.Qsa:
-                    u = self.Qsa[(s, a)] + self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
-                            1 + self.Nsa[(s, a)])
+                    cpuct = self.args.cpuct_mult * math.log(
+                        (1 + self.Ns[s] + self.args.cpuct_base) / self.args.cpuct_base) + self.args.cpuct
+                    u = self.Qsa[(s, a)] + cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
                 else:
-                    u = self.args.cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
+                    cpuct = self.args.cpuct_mult * math.log(
+                        (1 + self.Ns[s] + self.args.cpuct_base) / self.args.cpuct_base) + self.args.cpuct
+                    u = cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s] + EPS)  # Q = 0 ?
 
                 if u > cur_best:
                     cur_best = u

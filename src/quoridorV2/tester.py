@@ -10,6 +10,7 @@ from alphazero_general.MCTS import MCTS
 
 from quoridorV2.pytorch.NNet import NNetWrapper as nn
 from quoridorV2.QuoridorGame import QuoridorGame as Game, QuoridorGame
+import QuoridorUtils
 
 log = logging.getLogger(__name__)
 
@@ -78,23 +79,24 @@ def get_wall_action(n, x, y, is_vertical):
     return shift + wall
 
 
-def main():
+def test_moves():
     n = 5
     game = QuoridorGame(n)
     board = game.getInitBoard()
     board.plot_board(save=False)
 
     player = -1
+
+    print(player, game.getValidActions(board, player))
     board, player = game.getNextState(board, player, 10)
     board.plot_board(save=False)
 
-    # wall = get_wall_action(n=n, x=0, y=0, is_vertical=True)
-    # print(wall)
-    # board, player = game.getNextState(board, player, wall)
-    # print(board.v_walls)
-    # print(board.h_walls)
-    # board.plot_board(save=False)
+    wall = get_wall_action(n=n, x=3, y=2, is_vertical=True)
+    print(player, game.getValidActions(board, player))
+    board, player = game.getNextState(board, player, wall)
+    board.plot_board(save=False)
 
+    print(player, game.getValidActions(board, player))
 
     # # Check flip
     # board = game.getCanonicalForm(board, 1)
@@ -102,8 +104,32 @@ def main():
     # board = game.getCanonicalForm(board, -1)
     # board.plot_board(save=False)
 
-    # simulate_search()
 
+def place_wall_and_print(game, board, x, y, isv=True):
+    wall = get_wall_action(n=game.n, x=x, y=y, is_vertical=isv)
+    board, player = game.getNextState(board, 1, wall)
+    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
+    print('len', length)
+    print(board.v_walls)
+    print(board.h_walls)
+    board.plot_board(path=path, save=False)
+    return board
+
+
+def main():
+    n = 5
+    game = QuoridorGame(n)
+    board = game.getInitBoard()
+    board.plot_board(save=False)
+
+    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
+    board.plot_board(path=path, save=False)
+
+    board = place_wall_and_print(game, board, 1, 2, False)
+    board = place_wall_and_print(game, board, 2, 3, True)
+    board = place_wall_and_print(game, board, 0, 3, True)
+
+    # simulate_search()
 
 
 if __name__ == "__main__":
