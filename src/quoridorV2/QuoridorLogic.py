@@ -154,13 +154,13 @@ class QuoridorBoard:
 
     def getValidActions(self, player):
         if player == 1:
-            return QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
-                                         self.blue_position[0], self.blue_position[1],
-                                         self.v_walls, self.h_walls)
+            return QuoridorUtils.getValidActions(self.red_position[0], self.red_position[1], self.n//2, self.red_goal,
+                                                 self.blue_position[0], self.blue_position[1], self.n//2, self.blue_goal,
+                                                 self.v_walls, self.h_walls, self.red_walls)
         else:
-            return QuoridorUtils.getPawnActions(self.blue_position[0], self.blue_position[1],
-                                         self.red_position[0], self.red_position[1],
-                                         self.v_walls, self.h_walls)
+            return QuoridorUtils.getValidActions(self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
+                                                 self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
+                                                 self.v_walls, self.h_walls, self.blue_walls)
 
     def executeAction(self, player, action):
         self.addToHistory()
@@ -269,7 +269,7 @@ class QuoridorBoard:
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):
             if i != 0 and i != len(points) - 1:
-                p = (float(p[0])*2, float(p[1])*2)
+                p = (float(p[0]) * 2, float(p[1]) * 2)
                 rect = patches.Rectangle(p, 1, 1, facecolor='tab:green', alpha=0.5)
                 ax_map.add_patch(rect)
 
