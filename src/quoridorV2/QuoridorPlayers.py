@@ -6,11 +6,9 @@ class RandomPlayer:
         self.game = game
 
     def play(self, board):
-        a = np.random.randint(self.game.getActionSize())
-        valids = self.game.getValidActions(board, 1)
-        while valids[a] != 1:
-            a = np.random.randint(self.game.getActionSize())
-        return a
+        actions = self.game.getValidActions(board, 1)
+        print(actions)
+        return np.random.choice(len(actions), p=np.array(actions)/sum(actions))
 
 
 class HumanQuoridorPlayer:

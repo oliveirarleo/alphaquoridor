@@ -53,7 +53,6 @@ inline bool PathExists(
         astarsearch.FreeSolutionNodes();
         astarsearch.EnsureMemoryFreed();
         return true;
-
     }
     astarsearch.EnsureMemoryFreed();
     return false;
@@ -170,7 +169,6 @@ inline std::tuple<std::vector<int>, int> FindPath(
         astarsearch.EnsureMemoryFreed();
 
     }
-
     return {path_full, steps};
 }
 

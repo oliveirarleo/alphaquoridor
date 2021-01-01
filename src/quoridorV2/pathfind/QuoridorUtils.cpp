@@ -32,7 +32,7 @@ void printBoard(const std::vector<std::vector<int>> &board) {
 
 void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
                     const std::vector<std::vector<int>> &vwalls, const std::vector<std::vector<int>> &hwalls,
-                     std::vector<int> &actions) {
+                    std::vector<int> &actions) {
     const int N = 0;
     const int S = 1;
     const int E = 2;
@@ -49,21 +49,21 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
     int board_size = (int) vwalls.size();
     //    NORTH
     // If nothing blocks north
-    if (!hasHWN(hwalls, player_x, player_y, board_size)){
+    if (!hasHWN(hwalls, player_x, player_y, board_size)) {
         // If no player on north
-        if ((player_x != opponent_x) || (player_y+1 != opponent_y)) {
+        if ((player_x != opponent_x) || (player_y + 1 != opponent_y)) {
             actions[N] = 1;
         } else {
             // If nothing blocking jump north
-            if (!hasHWN(hwalls, player_x, player_y+1, board_size)) {
+            if (!hasHWN(hwalls, player_x, player_y + 1, board_size)) {
                 actions[JN] = 1;
             } else {
                 // If nothing blocking north east
-                if (!hasVWE(vwalls, player_x, player_y+1, board_size)){
+                if (!hasVWE(vwalls, player_x, player_y + 1, board_size)) {
                     actions[NE] = 1;
                 }
                 // If nothing blocking north west
-                if (!hasVWE(vwalls, player_x-1, player_y+1, board_size)){
+                if (!hasVWE(vwalls, player_x - 1, player_y + 1, board_size)) {
                     actions[NW] = 1;
                 }
             }
@@ -73,21 +73,21 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
 
     //    SOUTH
     // If nothing blocks south
-    if (!hasHWN(hwalls, player_x, player_y-1, board_size)){
+    if (!hasHWN(hwalls, player_x, player_y - 1, board_size)) {
         // If no player on south
-        if ((player_x != opponent_x) || (player_y-1 != opponent_y)) {
+        if ((player_x != opponent_x) || (player_y - 1 != opponent_y)) {
             actions[S] = 1;
         } else {
             // If nothing blocking jump south
-            if (!hasHWN(hwalls, player_x, player_y-2, board_size)) {
+            if (!hasHWN(hwalls, player_x, player_y - 2, board_size)) {
                 actions[JS] = 1;
             } else {
                 // If nothing blocking south east
-                if (!hasVWE(vwalls, player_x, player_y-1, board_size)){
+                if (!hasVWE(vwalls, player_x, player_y - 1, board_size)) {
                     actions[SE] = 1;
                 }
                 // If nothing blocking south west
-                if (!hasVWE(vwalls, player_x-1, player_y-1, board_size)){
+                if (!hasVWE(vwalls, player_x - 1, player_y - 1, board_size)) {
                     actions[SW] = 1;
                 }
             }
@@ -97,21 +97,21 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
 
     //    EAST
     // If nothing blocks east
-    if (!hasVWE(vwalls, player_x, player_y, board_size)){
+    if (!hasVWE(vwalls, player_x, player_y, board_size)) {
         // If no player on east
-        if ((player_x+1 != opponent_x) || (player_y != opponent_y)) {
+        if ((player_x + 1 != opponent_x) || (player_y != opponent_y)) {
             actions[E] = 1;
         } else {
             // If nothing blocking jump east
-            if (!hasVWE(vwalls, player_x+1, player_y, board_size)) {
+            if (!hasVWE(vwalls, player_x + 1, player_y, board_size)) {
                 actions[JE] = 1;
             } else {
                 // If nothing blocking north east
-                if (!hasHWN(hwalls, player_x+1, player_y, board_size)){
+                if (!hasHWN(hwalls, player_x + 1, player_y, board_size)) {
                     actions[NE] = 1;
                 }
                 // If nothing blocking south east
-                if (!hasHWN(hwalls, player_x+1, player_y-1, board_size)){
+                if (!hasHWN(hwalls, player_x + 1, player_y - 1, board_size)) {
                     actions[SE] = 1;
                 }
             }
@@ -121,21 +121,21 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
 
     //    WEST
     // If nothing blocks west
-    if (!hasVWE(vwalls, player_x-1, player_y, board_size)){
+    if (!hasVWE(vwalls, player_x - 1, player_y, board_size)) {
         // If no player on west
-        if ((player_x-1 != opponent_x) || (player_y != opponent_y)) {
+        if ((player_x - 1 != opponent_x) || (player_y != opponent_y)) {
             actions[W] = 1;
         } else {
             // If nothing blocking jump west
-            if (!hasVWE(vwalls, player_x-2, player_y, board_size)) {
+            if (!hasVWE(vwalls, player_x - 2, player_y, board_size)) {
                 actions[JW] = 1;
             } else {
                 // If nothing blocking north west
-                if (!hasHWN(hwalls, player_x-1, player_y, board_size)){
+                if (!hasHWN(hwalls, player_x - 1, player_y, board_size)) {
                     actions[NW] = 1;
                 }
                 // If nothing blocking south west
-                if (!hasHWN(hwalls, player_x-1, player_y-1, board_size)){
+                if (!hasHWN(hwalls, player_x - 1, player_y - 1, board_size)) {
                     actions[SW] = 1;
                 }
             }
@@ -145,7 +145,8 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
 }
 
 std::vector<int> getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
-                    const std::vector<std::vector<int>> &vwalls, const std::vector<std::vector<int>> &hwalls) {
+                                const std::vector<std::vector<int>> &vwalls,
+                                const std::vector<std::vector<int>> &hwalls) {
     std::vector<int> actions(12, 0);
     setPawnActions(player_x, player_y, opponent_x, opponent_y, vwalls, hwalls, actions);
     return actions;
@@ -312,11 +313,147 @@ inline std::tuple<std::vector<int>, int> findPath(
 }
 
 
+bool canPlaceWall(int px, int py, int pgx, int pgy,
+                  int ox, int oy, int ogx, int ogy,
+                  int wx, int wy, bool is_vertical,
+                  std::vector<std::vector<int>> &vwalls,
+                  std::vector<std::vector<int>> &hwalls) {
+    if (is_vertical)
+        vwalls[wx][wy] = 1;
+    else
+        hwalls[wx][wy] = 1;
+
+    bool res = pathExists(px, py, pgx, pgy, vwalls, hwalls) && pathExists(ox, oy, ogx, ogy, vwalls, hwalls);
+
+    if (is_vertical)
+        vwalls[wx][wy] = 0;
+    else
+        hwalls[wx][wy] = 0;
+
+    return res;
+}
+
+void setWallActions(int px, int py, int pgx, int pgy,
+                    int ox, int oy, int ogx, int ogy,
+                    std::vector<std::vector<int>> &vwalls,
+                    std::vector<std::vector<int>> &hwalls,
+                    int num_walls,
+                    std::vector<std::vector<int>> &vwall_actions,
+                    std::vector<std::vector<int>> &hwall_actions) {
+    int board_size = (int) vwalls.size();
+    for (int i = 0; i < board_size; ++i) {
+        for (int j = 0; j < board_size; ++j) {
+            // Vwalls
+            if ((vwalls[i][j] == 0) &&
+                (j + 1 < board_size && vwalls[i][j + 1] == 0) &&
+                (j - 1 >= 0 && vwalls[i][j - 1] == 0) &&
+                (hwalls[i][j] == 0)) {
+
+                int connections = 0;
+                if ((j + 1 >= board_size) ||
+                    (hwalls[i][j + 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j + 1] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j + 1] == 1) ||
+                    (j + 2 < board_size && vwalls[i][j + 2] == 1))
+                    connections += 1;
+                if ((j - 1 < 0) ||
+                    (hwalls[i][j - 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j - 1] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j - 1] == 1) ||
+                    (j - 2 < board_size && vwalls[i][j - 2] == 1))
+                    connections += 1;
+                if ((i - 1 >= 0 && hwalls[i - 1][j] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j] == 1))
+                    connections += 1;
+
+                if (connections < 2 ||
+                    canPlaceWall(px, py, pgx, pgy, ox, oy, ogx, ogy, i, j, true, vwalls, hwalls)) {
+                    vwall_actions[i][j] = 1;
+                }
+            }
+            // Hwalls
+            if ((hwalls[i][j] == 0) &&
+                (i + 1 < board_size && hwalls[i + 1][j] == 0) &&
+                (i - 1 >= 0 && hwalls[i - 1][j] == 0) &&
+                (vwalls[i][j] == 0)) {
+
+                int connections = 0;
+                if ((i + 1 >= board_size) ||
+                    (vwalls[i + 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i - 1][j + 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i + 1][j + 1] == 1) ||
+                    (i + 2 < board_size && hwalls[i][j + 2] == 1))
+                    connections += 1;
+                if ((i - 1 < 0) ||
+                    (vwalls[i - 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i - 1][j - 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i - 1][j + 1] == 1) ||
+                    (i - 2 < board_size && hwalls[i - 2][j] == 1))
+                    connections += 1;
+                if ((j - 1 >= 0 && vwalls[i][j - 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i][j + 1] == 1))
+                    connections += 1;
+
+                if (connections < 2 ||
+                    canPlaceWall(px, py, pgx, pgy, ox, oy, ogx, ogy, i, j, false, vwalls, hwalls)) {
+                    hwall_actions[i][j] = 1;
+                }
+            }
+        }
+    }
+}
+
+std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+getWallActions(int px, int py, int pgx, int pgy,
+               int ox, int oy, int ogx, int ogy,
+               std::vector<std::vector<int>> &vwalls,
+               std::vector<std::vector<int>> &hwalls,
+               int num_walls) {
+
+    int board_size = (int) vwalls.size();
+    std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
+    std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
+    if (num_walls > 0)
+        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, num_walls, vwall_actions, hwall_actions);
+    return {vwall_actions, hwall_actions};
+}
+
+std::vector<int> getValidActions(int px, int py, int pgx, int pgy,
+                                 int ox, int oy, int ogx, int ogy,
+                                 std::vector<std::vector<int>> &vwalls,
+                                 std::vector<std::vector<int>> &hwalls,
+                                 int num_walls) {
+    int board_size = (int) vwalls.size();
+    int action_size = 12 + 2 * board_size;
+    std::vector<int> actions(action_size, 0);
+    setPawnActions(px, py, ox, oy, vwalls, hwalls, actions);
+
+    if (num_walls > 0){
+        std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
+        std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
+        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, num_walls, vwall_actions, hwall_actions);
+
+        for (int i = 0; i < board_size; ++i) {
+            for (int j = 0; j < board_size; ++j) {
+                int pawn_actions_shift = 12;
+                actions[pawn_actions_shift+i*board_size+j] = vwall_actions[i][j];
+
+                int vwall_actions_shift = pawn_actions_shift + (board_size*board_size);
+                actions[vwall_actions_shift+i*board_size+j] = hwall_actions[i][j];
+            }
+        }
+    }
+
+    return actions;
+
+}
 
 inline PYBIND11_MODULE(QuoridorUtils, module) {
     module.doc() = "Quoridor Utils for engine V2";
 
-    module.def("getPawnActions", &getPawnActions, "");
     module.def("pathExists", &pathExists, "");
     module.def("findPath", &findPath, "");
+    module.def("getPawnActions", &getPawnActions, "");
+    module.def("getWallActions", &getWallActions, "");
+    module.def("getValidActions", &getValidActions, "");
 }

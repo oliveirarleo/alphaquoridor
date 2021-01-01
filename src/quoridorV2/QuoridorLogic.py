@@ -153,21 +153,6 @@ class QuoridorBoard:
         return self
 
     def getValidActions(self, player):
-        # red(x,y) hw bloqueia N ->     (x-1,y)     (x,y)
-        # red(x,y) hw bloqueia NN ->    (x-1,y+1)   (x,y+1)
-        # red(x,y) vw bloqueia NE ->    (x,y)       (x,y+1)
-        # red(x,y) vw bloqueia NW ->    (x-1,y)     (x-1,y+1)
-
-        # red(x,y) hw bloqueia S ->     (x-1,y-1)   (x,y-1)
-        # red(x,y) hw bloqueia SS ->    (x-1,y-2)   (x,y-2)
-        # red(x,y) vw bloqueia SW ->    (x-1,y-1)   (x-1,y-2)
-        # red(x,y) vw bloqueia SE ->    (x,y-1)     (x,y-2)
-
-        # red(x,y) vw bloqueia E ->     (x,y-1)     (x,y)
-        # red(x,y) vw bloqueia EE ->    (x+1,y-1)   (x+1,y)
-
-        # red(x,y) vw bloqueia W ->     (x-1,y-1)   (x-1,y)
-        # red(x,y) vw bloqueia WW ->    (x-2,y-1)   (x-2,y)
         if player == 1:
             return QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
                                          self.blue_position[0], self.blue_position[1],

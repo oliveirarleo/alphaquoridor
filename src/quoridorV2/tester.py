@@ -4,6 +4,7 @@ import logging
 from tqdm import tqdm
 
 from alphazero_general.Arena import Arena
+from quoridorV2.QuoridorPlayers import RandomPlayer
 from utils import dotdict
 
 from alphazero_general.MCTS import MCTS
@@ -108,7 +109,7 @@ def test_moves():
 def place_wall_and_print(game, board, x, y, isv=True):
     wall = get_wall_action(n=game.n, x=x, y=y, is_vertical=isv)
     board, player = game.getNextState(board, 1, wall)
-    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
+    path, length = QuoridorUtils.findPath(board.red_position, (3, board.red_goal), board.v_walls, board.h_walls)
     print('len', length)
     print(board.v_walls)
     print(board.h_walls)
@@ -116,20 +117,36 @@ def place_wall_and_print(game, board, x, y, isv=True):
     return board
 
 
-def main():
+def play_random_moves(n_random_moves):
     n = 5
     game = QuoridorGame(n)
     board = game.getInitBoard()
     board.plot_board(save=False)
 
-    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
-    board.plot_board(path=path, save=False)
+    agent = RandomPlayer(game)
+    player = 1
+    for i in range(n_random_moves):
+        action = agent.play(board)
+        print(action)
+        board, player = game.getNextState(board, 1, action)
+        board = game.getCanonicalForm(board, player)
+        board.plot_board(invert_yaxis=(i % 2 == 0), save=False)
 
-    board = place_wall_and_print(game, board, 1, 2, False)
-    board = place_wall_and_print(game, board, 2, 3, True)
-    board = place_wall_and_print(game, board, 0, 3, True)
 
-    # simulate_search()
+def main():
+    # n = 5
+    # game = QuoridorGame(n)
+    # board = game.getInitBoard()
+    # board.plot_board(save=False)
+    #
+    # path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
+    # board.plot_board(path=path, save=False)
+    #
+    # board = place_wall_and_print(game, board, 1, 2, False)
+    # board = place_wall_and_print(game, board, 2, 3, True)
+    # board = place_wall_and_print(game, board, 0, 3, True)
+
+    play_random_moves(10)
 
 
 if __name__ == "__main__":
