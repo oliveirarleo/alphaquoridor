@@ -11,7 +11,7 @@ class RandomPlayer:
 
     def play(self, board):
         actions = self.game.getValidActions(board, 1)
-        print(actions)
+        # print(actions)
         return np.random.choice(len(actions), p=np.array(actions) / sum(actions))
 
 

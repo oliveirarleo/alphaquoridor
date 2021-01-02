@@ -337,7 +337,6 @@ void setWallActions(int px, int py, int pgx, int pgy,
                     int ox, int oy, int ogx, int ogy,
                     std::vector<std::vector<int>> &vwalls,
                     std::vector<std::vector<int>> &hwalls,
-                    int num_walls,
                     std::vector<std::vector<int>> &vwall_actions,
                     std::vector<std::vector<int>> &hwall_actions) {
     int board_size = (int) vwalls.size();
@@ -346,23 +345,23 @@ void setWallActions(int px, int py, int pgx, int pgy,
             // Vwalls
             if ((vwalls[i][j] == 0) &&
                 (j + 1 >= board_size || vwalls[i][j + 1] == 0) &&
-                (j - 1 < 0           || vwalls[i][j - 1] == 0) &&
+                (j - 1 < 0 || vwalls[i][j - 1] == 0) &&
                 (hwalls[i][j] == 0)) {
 
                 int connections = 0;
                 if ((j + 1 >= board_size) ||
-                    (                      hwalls[i][j + 1] == 1) ||
-                    (i - 1 >= 0 &&         hwalls[i - 1][j + 1] == 1) ||
+                    (hwalls[i][j + 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j + 1] == 1) ||
                     (i + 1 < board_size && hwalls[i + 1][j + 1] == 1) ||
                     (j + 2 < board_size && vwalls[i][j + 2] == 1))
                     connections += 1;
                 if ((j - 1 < 0) ||
-                    (                      hwalls[i][j - 1] == 1) ||
-                    (i - 1 >= 0 &&         hwalls[i - 1][j - 1] == 1) ||
+                    (hwalls[i][j - 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j - 1] == 1) ||
                     (i + 1 < board_size && hwalls[i + 1][j - 1] == 1) ||
                     (j - 2 >= 0 && vwalls[i][j - 2] == 1))
                     connections += 1;
-                if ((i - 1 >= 0         && hwalls[i - 1][j] == 1) ||
+                if ((i - 1 >= 0 && hwalls[i - 1][j] == 1) ||
                     (i + 1 < board_size && hwalls[i + 1][j] == 1))
                     connections += 1;
 
@@ -375,25 +374,99 @@ void setWallActions(int px, int py, int pgx, int pgy,
             // Hwalls
             if ((hwalls[i][j] == 0) &&
                 (i + 1 >= board_size || hwalls[i + 1][j] == 0) &&
-                (i - 1 < 0           || hwalls[i - 1][j] == 0) &&
+                (i - 1 < 0 || hwalls[i - 1][j] == 0) &&
                 (vwalls[i][j] == 0)) {
 
                 int connections = 0;
                 if ((i + 1 >= board_size) ||
-                    (                      vwalls[i + 1][j] == 1) ||
-                    (j - 1 >= 0 &&         vwalls[i + 1][j - 1] == 1) ||
+                    (vwalls[i + 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i + 1][j - 1] == 1) ||
                     (j + 1 < board_size && vwalls[i + 1][j + 1] == 1) ||
                     (i + 2 < board_size && hwalls[i + 2][j] == 1))
                     connections += 1;
 
                 if ((i - 1 < 0) ||
-                    (                      vwalls[i - 1][j] == 1) ||
-                    (j - 1 >= 0         && vwalls[i - 1][j - 1] == 1) ||
+                    (vwalls[i - 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i - 1][j - 1] == 1) ||
                     (j + 1 < board_size && vwalls[i - 1][j + 1] == 1) ||
                     (i - 2 >= 0 && hwalls[i - 2][j] == 1))
                     connections += 1;
 
-                if ((j - 1 >= 0         && vwalls[i][j - 1] == 1) ||
+                if ((j - 1 >= 0 && vwalls[i][j - 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i][j + 1] == 1))
+                    connections += 1;
+
+                if (connections < 2 ||
+                    canPlaceWall(px, py, pgx, pgy, ox, oy, ogx, ogy, i, j, false, vwalls, hwalls)) {
+                    hwall_actions[i][j] = 1;
+                }
+            }
+        }
+    }
+}
+
+void updateWallActions_(int px, int py, int pgx, int pgy,
+                        int ox, int oy, int ogx, int ogy,
+                        std::vector<std::vector<int>> &vwalls,
+                        std::vector<std::vector<int>> &hwalls,
+                        const std::vector<std::vector<int>> &old_legal_vwall_actions,
+                        const std::vector<std::vector<int>> &old_legal_hwall_actions,
+                        std::vector<std::vector<int>> &vwall_actions,
+                        std::vector<std::vector<int>> &hwall_actions) {
+    int board_size = (int) vwalls.size();
+    for (int i = 0; i < board_size; ++i) {
+        for (int j = 0; j < board_size; ++j) {
+            // Vwalls
+            if ((vwalls[i][j] == 0 && old_legal_vwall_actions[i][j] == 1) &&
+                (j + 1 >= board_size || vwalls[i][j + 1] == 0) &&
+                (j - 1 < 0 || vwalls[i][j - 1] == 0) &&
+                (hwalls[i][j] == 0)) {
+
+                int connections = 0;
+                if ((j + 1 >= board_size) ||
+                    (hwalls[i][j + 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j + 1] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j + 1] == 1) ||
+                    (j + 2 < board_size && vwalls[i][j + 2] == 1))
+                    connections += 1;
+                if ((j - 1 < 0) ||
+                    (hwalls[i][j - 1] == 1) ||
+                    (i - 1 >= 0 && hwalls[i - 1][j - 1] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j - 1] == 1) ||
+                    (j - 2 >= 0 && vwalls[i][j - 2] == 1))
+                    connections += 1;
+                if ((i - 1 >= 0 && hwalls[i - 1][j] == 1) ||
+                    (i + 1 < board_size && hwalls[i + 1][j] == 1))
+                    connections += 1;
+
+                if (connections < 2 ||
+                    canPlaceWall(px, py, pgx, pgy, ox, oy, ogx, ogy, i, j, true, vwalls, hwalls)) {
+                    vwall_actions[i][j] = 1;
+                }
+            }
+
+            // Hwalls
+            if ((hwalls[i][j] == 0 && old_legal_hwall_actions[i][j] == 1) &&
+                (i + 1 >= board_size || hwalls[i + 1][j] == 0) &&
+                (i - 1 < 0 || hwalls[i - 1][j] == 0) &&
+                (vwalls[i][j] == 0)) {
+
+                int connections = 0;
+                if ((i + 1 >= board_size) ||
+                    (vwalls[i + 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i + 1][j - 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i + 1][j + 1] == 1) ||
+                    (i + 2 < board_size && hwalls[i + 2][j] == 1))
+                    connections += 1;
+
+                if ((i - 1 < 0) ||
+                    (vwalls[i - 1][j] == 1) ||
+                    (j - 1 >= 0 && vwalls[i - 1][j - 1] == 1) ||
+                    (j + 1 < board_size && vwalls[i - 1][j + 1] == 1) ||
+                    (i - 2 >= 0 && hwalls[i - 2][j] == 1))
+                    connections += 1;
+
+                if ((j - 1 >= 0 && vwalls[i][j - 1] == 1) ||
                     (j + 1 < board_size && vwalls[i][j + 1] == 1))
                     connections += 1;
 
@@ -417,7 +490,28 @@ getWallActions(int px, int py, int pgx, int pgy,
     std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
     std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
     if (num_walls > 0)
-        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, num_walls, vwall_actions, hwall_actions);
+        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, vwall_actions, hwall_actions);
+
+    return {vwall_actions, hwall_actions};
+}
+
+std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+updateWallActions(int px, int py, int pgx, int pgy,
+                  int ox, int oy, int ogx, int ogy,
+                  const std::vector<std::vector<int>> &old_legal_vwall_actions,
+                  const std::vector<std::vector<int>> &old_legal_hwall_actions,
+                  std::vector<std::vector<int>> &vwalls,
+                  std::vector<std::vector<int>> &hwalls,
+                  int num_walls) {
+
+    int board_size = (int) vwalls.size();
+    std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
+    std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
+    if (num_walls > 0)
+        updateWallActions_(px, py, pgx, pgy, ox, oy, ogx, ogy,
+                           vwalls, hwalls,
+                           old_legal_vwall_actions, old_legal_hwall_actions,
+                           vwall_actions, hwall_actions);
 
     return {vwall_actions, hwall_actions};
 }
@@ -428,22 +522,22 @@ std::vector<int> getValidActions(int px, int py, int pgx, int pgy,
                                  std::vector<std::vector<int>> &hwalls,
                                  int num_walls) {
     int board_size = (int) vwalls.size();
-    int action_size = 12 + 2 * board_size*board_size;
+    int action_size = 12 + 2 * board_size * board_size;
     std::vector<int> actions(action_size, 0);
     setPawnActions(px, py, ox, oy, vwalls, hwalls, actions);
 
-    if (num_walls > 0){
+    if (num_walls > 0) {
         std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
         std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
-        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, num_walls, vwall_actions, hwall_actions);
+        setWallActions(px, py, pgx, pgy, ox, oy, ogx, ogy, vwalls, hwalls, vwall_actions, hwall_actions);
 
         for (int i = 0; i < board_size; ++i) {
             for (int j = 0; j < board_size; ++j) {
                 int pawn_actions_shift = 12;
-                actions[pawn_actions_shift+i*board_size+j] = vwall_actions[i][j];
+                actions[pawn_actions_shift + i * board_size + j] = vwall_actions[i][j];
 
-                int vwall_actions_shift = pawn_actions_shift + (board_size*board_size);
-                actions[vwall_actions_shift+i*board_size+j] = hwall_actions[i][j];
+                int vwall_actions_shift = pawn_actions_shift + (board_size * board_size);
+                actions[vwall_actions_shift + i * board_size + j] = hwall_actions[i][j];
             }
         }
     }
@@ -460,4 +554,5 @@ inline PYBIND11_MODULE(QuoridorUtils, module) {
     module.def("getPawnActions", &getPawnActions, "");
     module.def("getWallActions", &getWallActions, "");
     module.def("getValidActions", &getValidActions, "");
+    module.def("updateWallActions", &updateWallActions, "");
 }

@@ -120,6 +120,31 @@ def place_wall_and_print(game, board, x, y, isv=True):
     return board
 
 
+def action_tostring(action, n):
+    pawn_action_translator = {
+        0: 'N',
+        1: 'S',
+        2: 'E',
+        3: 'W',
+        4: 'JN',
+        5: 'JS',
+        6: 'JE',
+        7: 'JW',
+        8: 'JNE',
+        9: 'JSW',
+        10: 'JNW',
+        11: 'JSE',
+    }
+    if action < 12:
+        return 'MOVE ' + pawn_action_translator[action]
+    elif action < 12 + (n - 1) ** 2:
+        shift = 12
+        return 'VWAL x:' + str((action - shift) // (n - 1)) + ' y:' + str((action - shift) % (n - 1))
+    else:
+        shift = 12 + (n - 1) ** 2
+        return 'HWAL x:' + str((action - shift) // (n - 1)) + ' y:' + str((action - shift) % (n - 1))
+
+
 def play_random_moves(n_random_moves):
     n = 5
     game = Game(n)
@@ -130,7 +155,7 @@ def play_random_moves(n_random_moves):
     player = 1
     for i in range(n_random_moves):
         action = agent.play(board)
-        print(action)
+        # print(action_tostring(action, n))
         board, player = game.getNextState(board, 1, action)
         board = game.getCanonicalForm(board, player)
         board.plot_board(invert_yaxis=(i % 2 == 0), save=False)
@@ -200,9 +225,10 @@ def main():
     # board = place_wall_and_print(game, board, 2, 3, True)
     # board = place_wall_and_print(game, board, 0, 3, True)
 
-    # play_random_moves(10)
+    play_random_moves(10)
 
-    train()
+    # train()
+
 
 if __name__ == "__main__":
     main()

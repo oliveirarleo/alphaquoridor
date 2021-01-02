@@ -35,6 +35,10 @@ class QuoridorBoard:
             self.h_walls = np.zeros((self.n - 1, self.n - 1), np.int16)
             self.draw = False
 
+            self.paths = np.full((self.n, self.n), self.n ** 2)
+            self.legal_vwalls = np.ones((self.n - 1, self.n - 1), np.int16)
+            self.legal_hwalls = np.ones((self.n - 1, self.n - 1), np.int16)
+
             self.max_walls = (self.n + 1) ** 2 // 10
             # red player
             self.red_position = (midpoint_red, 0)
@@ -116,11 +120,10 @@ class QuoridorBoard:
 
     def transformWalls(self, wall):
         res = np.zeros((self.n, self.n))
-        for i in range(self.n-1):
-            for j in range(self.n-1):
+        for i in range(self.n - 1):
+            for j in range(self.n - 1):
                 res[i][j] = wall[i][j]
         return res
-
 
     def getBoardDist(self, is_red=True):
         dists = np.zeros((self.n, self.n), dtype=int)
@@ -143,6 +146,15 @@ class QuoridorBoard:
         self.h_walls = np.array(board.h_walls, copy=True)
         self.draw = board.draw
 
+        # if board.paths is not None:
+        self.paths = np.array(board.paths, copy=True)
+
+        # if board.legal_vwalls is not None:
+        self.legal_vwalls = np.array(board.legal_vwalls, copy=True)
+
+        # if board.legal_hwalls is not None:
+        self.legal_hwalls = np.array(board.legal_hwalls, copy=True)
+
         self.red_position = board.red_position
         self.red_walls = board.red_walls
         self.red_goal = board.red_goal
@@ -164,6 +176,8 @@ class QuoridorBoard:
         self.blue_board = np.flip(self.blue_board, (0, 1))
         self.v_walls = np.flip(self.v_walls, (0, 1))
         self.h_walls = np.flip(self.h_walls, (0, 1))
+        self.legal_vwalls = np.flip(self.legal_vwalls, (0, 1))
+        self.legal_hwalls = np.flip(self.legal_hwalls, (0, 1))
 
     def makeCanonical(self, player):
         if player != 1:
@@ -172,13 +186,19 @@ class QuoridorBoard:
 
     def getValidActions(self, player):
         if player == 1:
-            return QuoridorUtils.getValidActions(self.red_position[0], self.red_position[1], self.n//2, self.red_goal,
-                                                 self.blue_position[0], self.blue_position[1], self.n//2, self.blue_goal,
-                                                 self.v_walls, self.h_walls, self.red_walls)
+            pawn_actions = QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
+                                                        self.blue_position[0], self.blue_position[1],
+                                                        self.v_walls, self.h_walls)
         else:
-            return QuoridorUtils.getValidActions(self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
-                                                 self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
-                                                 self.v_walls, self.h_walls, self.blue_walls)
+            pawn_actions = QuoridorUtils.getPawnActions(self.blue_position[0], self.blue_position[1],
+                                                        self.red_position[0], self.red_position[1],
+                                                        self.v_walls, self.h_walls)
+        # print(pawn_actions)
+        # print(np.concatenate((self.legal_vwalls, self.legal_hwalls)))
+        # print(pawn_actions + list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten()))))
+        # print(self.legal_vwalls)
+        # print(self.legal_hwalls)
+        return pawn_actions + list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
 
     def executeAction(self, player, action):
         self.addToHistory()
@@ -197,12 +217,21 @@ class QuoridorBoard:
             x = int((action - pawn_moves) / (self.n - 1))
             y = int((action - pawn_moves) % (self.n - 1))
             self.actions['vw'](player, x, y)
-
+            self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
+                self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
+                self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
+                self.legal_vwalls, self.legal_hwalls,
+                self.v_walls, self.h_walls, self.red_walls)
         # Horizontal Walls
         else:
             x = int((action - vertical_wall_moves) / (self.n - 1))
             y = int((action - vertical_wall_moves) % (self.n - 1))
             self.actions['hw'](player, x, y)
+            self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
+                self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
+                self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
+                self.legal_vwalls, self.legal_hwalls,
+                self.v_walls, self.h_walls, self.red_walls)
 
     def move(self, player, x, y, dx=0, dy=0):
         if player == 1:
@@ -231,7 +260,7 @@ class QuoridorBoard:
 
         self.h_walls[x, y] = 1
 
-    def plot_board(self, invert_yaxis=False, path=None, name=None, save=True):
+    def plot_board(self, invert_yaxis=False, path=None, name=None, save=True, print_lw=True):
         if path is None:
             path = []
         if name is None:
@@ -274,6 +303,19 @@ class QuoridorBoard:
                         ax_map.add_patch(rect)
                         rect = patches.Rectangle((x - 1, y), 1, 1, linewidth=0, facecolor=color2w)
                         ax_map.add_patch(rect)
+                    if print_lw:
+                        s = ''
+                        if self.legal_vwalls[(x + 1) // 2 - 1, (y + 1) // 2 - 1] == 1:
+                            s += 'V'
+                        if self.legal_hwalls[(x + 1) // 2 - 1, (y + 1) // 2 - 1] == 1:
+                            s += 'H'
+                        if s != '':
+                            ax_map.text(x + 0.5, y + 0.5, s,
+                                        verticalalignment='center',
+                                        horizontalalignment='center',
+                                        fontsize=15,
+                                        fontweight='bold')
+
                 elif x % 2 == 0 and y % 2 == 0:
                     # Red Player
                     if self.red_board[x // 2, y // 2] == 1:
