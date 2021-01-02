@@ -19,16 +19,16 @@ args = dotdict({
     'updateThreshold': 0.60,
     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-    'numMCTSSims': 35,  # Number of games moves for MCTS to simulate.
+    'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
     'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 2.5,
     'cpuct_base': 19652,
     'cpuct_mult': 2,
 
-    'checkpoint': './temp/',
-    'load_model': False,
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/',
+    'load_model': True,
     'load_examples': False,
-    'load_folder_file': ('./temp/', 'quoridor_n9_v1_nnetv0_torch_checkpoint_3.pth.tar'),
+    'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/', 'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
 
 })

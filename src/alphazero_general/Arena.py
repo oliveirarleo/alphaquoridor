@@ -45,7 +45,7 @@ class Arena:
             it += 1
             if verbose:
                 assert self.display
-                print("Turn ", str(it), "Player ", str(curPlayer))
+                # print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board, name=name+'_'+str(it))
             action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
 

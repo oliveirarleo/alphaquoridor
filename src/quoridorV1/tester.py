@@ -1,6 +1,7 @@
 import sys
 import os
 
+import coloredlogs
 import numpy as np
 import logging
 
@@ -141,7 +142,7 @@ def main():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 1000,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
@@ -153,6 +154,8 @@ def main():
         'numItersForTrainExamplesHistory': 20,
 
     })
+
+    coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
     log.info('Loading %s...', Game.__name__)
     g = Game(5)
 
@@ -166,9 +169,10 @@ def main():
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
     log.info('PITTING AGAINST PREVIOUS VERSION')
-    arena = Arena(lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
-                  lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=1)), g, g.display)
-    pwins, nwins, draws = arena.playGames(4, verbose=True)
+    temp = 0
+    arena = Arena(lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=temp)),
+                  lambda x: np.random.choice(g.getActionSize(), p=pmcts.getActionProb(x, temp=temp)), g, g.display)
+    pwins, nwins, draws = arena.playGames(40, verbose=True)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
     # game = QuoridorGame(5)

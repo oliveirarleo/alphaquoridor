@@ -102,7 +102,25 @@ class QuoridorBoard:
             self.draw = True
 
     def getBoard(self):
-        return self.red_board, self.blue_board, self.v_walls, self.h_walls, self.red_walls, self.blue_walls, self.draw
+        board = np.zeros((4, self.n, self.n), dtype=int)
+        board[0] = self.transformWalls(self.v_walls)
+        board[1] = self.transformWalls(self.h_walls)
+        board[2] = self.red_board
+        board[3] = self.blue_board
+        if self.draw:
+            board[3] = np.ones((self.n, self.n))
+        else:
+            board[3] = np.zeros((self.n, self.n))
+        return board
+        # return self.red_board, self.blue_board, self.v_walls, self.h_walls, self.red_walls, self.blue_walls, self.draw
+
+    def transformWalls(self, wall):
+        res = np.zeros((self.n, self.n))
+        for i in range(self.n-1):
+            for j in range(self.n-1):
+                res[i][j] = wall[i][j]
+        return res
+
 
     def getBoardDist(self, is_red=True):
         dists = np.zeros((self.n, self.n), dtype=int)

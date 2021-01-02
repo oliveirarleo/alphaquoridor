@@ -13,6 +13,7 @@ class QuoridorGame(Game):
         super().__init__()
         self.n = n
         self.action_size = 12 + 2 * (self.n - 1) ** 2
+        self.board_len = 2 * self.n - 1
 
     def __str__(self):
         return 'quoridor_n'+str(self.n)+'_v2'
@@ -32,6 +33,13 @@ class QuoridorGame(Game):
         """
         # 4 pawn moves, 8 jumps, 64 vertical walls, 64 horizontal walls
         return self.action_size
+
+    def getBoardSize(self):
+        """
+        Returns:
+            (x,y): a tuple of board dimensions
+        """
+        return self.n, self.n, 4
 
     def getNextState(self, board, player, action):
         """

@@ -132,7 +132,8 @@ class Coach:
                                           filename=str(self.game) + '_' + str(self.nnet) + '_best.pth.tar')
 
     def getCheckpointFile(self, iteration):
-        return str(self.game) + '_' + str(self.nnet) + '_checkpoint_' + str(iteration) + '.pth.tar'
+        # return str(self.game) + '_' + str(self.nnet) + '_checkpoint_' + str(iteration) + '.pth.tar'
+        return str(self.game) + '_' + str(self.nnet) + '_checkpoint.pth.tar'
 
     def saveTrainExamples(self, iteration):
         folder = self.args.checkpoint
