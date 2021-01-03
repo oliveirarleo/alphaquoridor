@@ -45,7 +45,6 @@ class Arena:
             it += 1
             if verbose:
                 assert self.display
-                # print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board, name=name+'_'+str(it))
 
             c = self.game.getCanonicalForm(board, curPlayer)
@@ -54,10 +53,10 @@ class Arena:
 
             if valids[action] == 0:
                 log.error(f'Action {action} is not valid!')
-                log.debug(f'valids = {valids}')
-                log.debug(f'player = {curPlayer}')
-                log.debug(f'red_walls = {board.red_walls}')
-                log.debug(f'blue_walls = {board.blue_walls}')
+                log.info(f'valids = {valids}')
+                log.info(f'player = {curPlayer}')
+                log.info(f'red_walls = {board.red_walls}')
+                log.info(f'blue_walls = {board.blue_walls}')
                 board.plot_board(save=False)
                 c.plot_board(save=False)
 

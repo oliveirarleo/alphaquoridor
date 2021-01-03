@@ -16,7 +16,7 @@ class QuoridorGame(Game):
         self.board_len = 2 * self.n - 1
 
     def __str__(self):
-        return 'quoridor_n'+str(self.n)+'_v2'
+        return 'quoridor_n'+str(self.n)+'_v3'
 
     def getInitBoard(self):
         """

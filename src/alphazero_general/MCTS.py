@@ -49,6 +49,16 @@ class MCTS:
         counts = [x ** (1. / temp) for x in counts]
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]
+
+        # valds = self.game.getValidActions(canonicalBoard, 1)
+        # for i, b in enumerate(valds):
+        #     if b == 0 and probs[i] > 0:
+        #         canonicalBoard.plot_board(save=False)
+        #         print(valds)
+        #         print(b)
+        # if sum(probs[:12]) == 0:
+        #     print(probs)
+        #     canonicalBoard.plot_board(save=False)
         return probs
 
     def search(self, canonicalBoard):

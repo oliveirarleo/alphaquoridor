@@ -4,8 +4,8 @@ import coloredlogs
 
 sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
-from quoridorV2.pytorch.NNet import NNetWrapper as nn
-from quoridorV2.QuoridorGame import QuoridorGame as Game
+from quoridorV3.pytorch.NNet import NNetWrapper as nn
+from quoridorV3.QuoridorGame import QuoridorGame as Game
 from utils import *
 
 log = logging.getLogger(__name__)
@@ -14,7 +14,7 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 600,  # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,  #
     'updateThreshold': 0.60,
     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -36,7 +36,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(5)
+    g = Game(9)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)

@@ -27,7 +27,7 @@ def play_games():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 40,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 250,  # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
@@ -52,9 +52,9 @@ def play_games():
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
     log.info('PITTING AGAINST PREVIOUS VERSION')
-    arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                  lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), g, g.display)
-    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=True)
+    arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
+                  lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), g, g.display)
+    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=False)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
@@ -165,7 +165,7 @@ def play_random_moves(n_random_moves):
 def train():
     log = logging.getLogger(__name__)
 
-    coloredlogs.install(level='DEBUG')  # Change this to DEBUG to see more info.
+    coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
     args = dotdict({
         'numIters': 1000,
@@ -174,17 +174,17 @@ def train():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 50,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
         'cpuct_mult': 2,
 
-        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/',
+        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/',
         'load_model': False,
         'load_examples': False,
-        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/',
-                             'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),
+        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/'
+                             'quoridor_n5_v3_nnet_v2_torch_checkpoint.pth.tar'),
         'numItersForTrainExamplesHistory': 20,
 
     })

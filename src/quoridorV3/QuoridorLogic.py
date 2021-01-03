@@ -184,8 +184,8 @@ class QuoridorBoard:
         return res
 
     def getBoardHashable(self):
-        return hash((self.red_position, self.blue_position, self.v_walls.tostring(),
-                     self.h_walls.tostring(), self.draw))
+        return (self.red_position, self.blue_position, self.v_walls.tostring(),
+                     self.h_walls.tostring(), self.draw, self.red_walls, self.blue_walls)
 
     def setBoard(self, board):
         self.history = copy.deepcopy(board.history)
@@ -276,10 +276,11 @@ class QuoridorBoard:
 
         self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
 
-        self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
-            self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
-            self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
-            self.v_walls, self.h_walls)
+        if self.red_walls > 0 or self.blue_walls > 0:
+            self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
+                self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
+                self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
+                self.v_walls, self.h_walls)
 
     def move(self, player, x, y, dx=0, dy=0):
         if player == 1:
@@ -363,11 +364,11 @@ class QuoridorBoard:
                 elif x % 2 == 0 and y % 2 == 0:
                     # Red Player
                     if self.red_position == (x // 2, y // 2):
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_red_board)
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_red_board, label=str(self.red_walls))
                         ax_map.add_patch(rect)
                     # Blue Player
                     if self.blue_position == (x // 2, y // 2):
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board)
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board, label=str(self.blue_walls))
                         ax_map.add_patch(rect)
                     if print_pm:
                         if flipped:
@@ -379,6 +380,8 @@ class QuoridorBoard:
                                     horizontalalignment='center',
                                     fontsize=15,
                                     fontweight='bold')
+
+        ax_map.legend(bbox_to_anchor=(1,1), loc="upper left")
 
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):
