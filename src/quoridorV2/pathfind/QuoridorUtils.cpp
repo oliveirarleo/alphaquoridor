@@ -418,7 +418,7 @@ inline void updateWallActions_(int px, int py, int pgx, int pgy,
     for (int i = 0; i < board_size; ++i) {
         for (int j = 0; j < board_size; ++j) {
             // Vwalls
-            if ((vwalls[i][j] == 0 && old_legal_vwall_actions[i][j] == 1) &&
+            if ((vwalls[i][j] == 0) &&
                 (j + 1 >= board_size || vwalls[i][j + 1] == 0) &&
                 (j - 1 < 0 || vwalls[i][j - 1] == 0) &&
                 (hwalls[i][j] == 0)) {
@@ -447,7 +447,7 @@ inline void updateWallActions_(int px, int py, int pgx, int pgy,
             }
 
             // Hwalls
-            if ((hwalls[i][j] == 0 && old_legal_hwall_actions[i][j] == 1) &&
+            if ((hwalls[i][j] == 0) &&
                 (i + 1 >= board_size || hwalls[i + 1][j] == 0) &&
                 (i - 1 < 0 || hwalls[i - 1][j] == 0) &&
                 (vwalls[i][j] == 0)) {

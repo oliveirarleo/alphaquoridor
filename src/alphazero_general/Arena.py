@@ -47,14 +47,20 @@ class Arena:
                 assert self.display
                 # print("Turn ", str(it), "Player ", str(curPlayer))
                 self.display(board, name=name+'_'+str(it))
-            action = players[curPlayer + 1](self.game.getCanonicalForm(board, curPlayer))
 
-            valids = self.game.getValidActions(self.game.getCanonicalForm(board, curPlayer), 1)
+            c = self.game.getCanonicalForm(board, curPlayer)
+            action = players[curPlayer + 1](c)
+            valids = self.game.getValidActions(c, 1)
 
             if valids[action] == 0:
                 log.error(f'Action {action} is not valid!')
                 log.debug(f'valids = {valids}')
+                log.debug(f'player = {curPlayer}')
+                log.debug(f'red_walls = {board.red_walls}')
+                log.debug(f'blue_walls = {board.blue_walls}')
                 board.plot_board(save=False)
+                c.plot_board(save=False)
+
                 assert valids[action] > 0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
         if verbose:

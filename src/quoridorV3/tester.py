@@ -28,12 +28,14 @@ def play_games():
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
         'numMCTSSims': 40,  # Number of games moves for MCTS to simulate.
-        'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
-        'cpuct': 1,
+        'arenaCompare': 250,  # Number of games to play during arena play to determine if new net will be accepted.
+        'cpuct': 2.5,
+        'cpuct_base': 19652,
+        'cpuct_mult': 2,
 
         'checkpoint': './temp/',
         'load_model': False,
-        'load_folder_file': ('./dev/models/v0_n9', 'quoridor_n9_v0_nnetv0_torch_checkpoint_1.pth.tar'),
+        'load_folder_file': ('./dev/models/v0_n5', 'quoridor_n5_v2_nnet_v2_torch_best.pth.tar'),
         'numItersForTrainExamplesHistory': 20,
 
     })
@@ -44,15 +46,15 @@ def play_games():
     nnet = nn(g)
     pnet = nn(g)
 
-    nnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
-    pnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
+    nnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
+    pnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
 
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
     log.info('PITTING AGAINST PREVIOUS VERSION')
     arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
                   lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), g, g.display)
-    pwins, nwins, draws = arena.playGames(4, verbose=True)
+    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=True)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
@@ -113,9 +115,9 @@ def place_wall_and_print(game, board, x, y, isv=True):
     wall = get_wall_action(n=game.n, x=x, y=y, is_vertical=isv)
     board, player = game.getNextState(board, 1, wall)
     path, length = QuoridorUtils.findPath(board.red_position, (3, board.red_goal), board.v_walls, board.h_walls)
-    print('len', length)
-    print(board.v_walls)
-    print(board.h_walls)
+    # print('len', length)
+    # print(board.v_walls)
+    # print(board.h_walls)
     board.plot_board(path=path, save=False)
     return board
 
@@ -163,7 +165,7 @@ def play_random_moves(n_random_moves):
 def train():
     log = logging.getLogger(__name__)
 
-    coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
+    coloredlogs.install(level='DEBUG')  # Change this to DEBUG to see more info.
 
     args = dotdict({
         'numIters': 1000,
@@ -215,21 +217,25 @@ def place_some_walls():
     n = 5
     game = Game(n)
     board = game.getInitBoard()
+    # board.plot_board(save=False)
+
+    board, player = game.getNextState(board, 1, 3)
+    board, player = game.getNextState(board, 1, 3)
+    # board = place_wall_and_print(game, board, 1, 2, False)
+    board = place_wall_and_print(game, board, 2, 1, False)
+    board = place_wall_and_print(game, board, 0, 1, False)
+
+    board, player = game.getNextState(board, 1, 2)
+    board, player = game.getNextState(board, 1, 2)
     board.plot_board(save=False)
-
-    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
-    board.plot_board(path=path, save=False)
-
-    board = place_wall_and_print(game, board, 1, 2, False)
-    board = place_wall_and_print(game, board, 2, 3, True)
-    board = place_wall_and_print(game, board, 0, 3, True)
 
 
 def main():
     # play_random_moves(10)
-
+    # place_some_walls()
     train()
 
+    # play_games()
 
 if __name__ == "__main__":
     main()

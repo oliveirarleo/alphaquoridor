@@ -255,9 +255,7 @@ class QuoridorBoard:
         self.addToHistory()
         pawn_moves = 12
         vertical_wall_moves = pawn_moves + (self.n - 1) ** 2
-        num_walls = self.red_walls
         if player == -1:
-            num_walls = self.blue_walls
             action = self.convert_action[action]
 
         # Pawn Moves
@@ -276,15 +274,11 @@ class QuoridorBoard:
                 y = int((action - vertical_wall_moves) % (self.n - 1))
                 self.actions['hw'](player, x, y)
 
-        # if self.is_flipped:
         self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
-        # else:
-        #     self.paths_blue, self.paths_red = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
 
         self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
             self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
             self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
-            self.legal_vwalls, self.legal_hwalls,
             self.v_walls, self.h_walls)
 
     def move(self, player, x, y, dx=0, dy=0):
