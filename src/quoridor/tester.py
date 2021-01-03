@@ -10,7 +10,7 @@ from alphazero_general.Arena import Arena
 from quoridor.QuoridorPlayers import RandomPlayer
 from utils import dotdict
 
-from quoridor.MCTSQuoridor import MCTS
+from alphazero_general.MCTSQuoridor import MCTS
 
 from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.QuoridorGame import QuoridorGame as Game
@@ -19,7 +19,11 @@ import QuoridorUtils
 log = logging.getLogger(__name__)
 
 
-def play_games():
+def play_games(n=5,
+               p1='quoridor_n5_v3_nnet_v2_torch_best.pth.tar',
+               p2='quoridor_n5_v3_nnet_v2_torch_best.pth.tar',
+               folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/',
+               num_games=4, numMCTSSims=100):
     args = dotdict({
         'numIters': 1000,
         'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
@@ -27,8 +31,9 @@ def play_games():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
-        'arenaCompare': 250,  # Number of games to play during arena play to determine if new net will be accepted.
+        'numMCTSSims': numMCTSSims,  # Number of games moves for MCTS to simulate.
+        'arenaCompare': num_games,
+        # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
         'cpuct_mult': 2,
@@ -40,14 +45,14 @@ def play_games():
 
     })
     log.info('Loading %s...', Game.__name__)
-    g = Game(5)
+    g = Game(n)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
     pnet = nn(g)
 
-    nnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
-    pnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
+    nnet.load_checkpoint(folder=folder, filename=p1)
+    pnet.load_checkpoint(folder=folder, filename=p2)
 
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
@@ -232,9 +237,10 @@ def place_some_walls():
 def main():
     # play_random_moves(10)
     # place_some_walls()
-    train(9)
+    # train(9)
 
-    # play_games()
+    play_games()
+
 
 if __name__ == "__main__":
     main()

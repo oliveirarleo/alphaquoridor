@@ -90,36 +90,35 @@ class MCTS:
             return -self.Es[s]
 
         if s not in self.Ps:
+            p, v = self.nnet.predict(canonicalBoard)
+            valids = self.game.getValidActions(canonicalBoard, 1)
+
             if canonicalBoard.red_walls == 0 and canonicalBoard.blue_walls == 0:
-                greedy_action = np.argmax(canonicalBoard.shortestPathActions())
-                actions = canonicalBoard.getActionSize()*[0]
-
-                for g in greedy_action:
-                    actions[g] = 1
-
-                p, v = self.nnet.predict(canonicalBoard)
+                ac = canonicalBoard.shortestPathActions()
+                greedy_actions = np.argwhere(ac == np.amax(ac))
+                actions = self.game.getActionSize() * [0]
+                for g in greedy_actions:
+                    actions[g[0]] = 1
 
                 self.Ps[s] = actions * p
                 sum_Ps_s = np.sum(self.Ps[s])
                 self.Ps[s] /= sum_Ps_s
 
-                return -v
-
-            # leaf node
-            self.Ps[s], v = self.nnet.predict(canonicalBoard)
-            valids = self.game.getValidActions(canonicalBoard, 1)
-            self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
-            sum_Ps_s = np.sum(self.Ps[s])
-            if sum_Ps_s > 0:
-                self.Ps[s] /= sum_Ps_s  # renormalize
             else:
-                # if all valid moves were masked make all valid moves equally probable
+                # leaf node
+                # self.Ps[s], v = self.nnet.predict(canonicalBoard)
+                self.Ps[s] = p * valids  # masking invalid moves
+                sum_Ps_s = np.sum(self.Ps[s])
+                if sum_Ps_s > 0:
+                    self.Ps[s] /= sum_Ps_s  # renormalize
+                else:
+                    # if all valid moves were masked make all valid moves equally probable
 
-                # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
-                # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.   
-                log.error("All valid moves were masked, doing a workaround.")
-                self.Ps[s] = self.Ps[s] + valids
-                self.Ps[s] /= np.sum(self.Ps[s])
+                    # NB! All valid moves may be masked if either your NNet architecture is insufficient or you've get overfitting or something else.
+                    # If you have got dozens or hundreds of these messages you should pay attention to your NNet and/or training process.
+                    log.error("All valid moves were masked, doing a workaround.")
+                    self.Ps[s] = self.Ps[s] + valids
+                    self.Ps[s] /= np.sum(self.Ps[s])
 
             self.Vs[s] = valids
             self.Ns[s] = 0

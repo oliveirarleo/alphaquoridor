@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from alphazero_general.Arena import Arena
-from alphazero_general.MCTS import MCTS
+from alphazero_general.MCTSQuoridor import MCTS
 
 log = logging.getLogger(__name__)
 
