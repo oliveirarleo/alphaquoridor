@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC -Wextra -g  -shared  -o QuoridorUtils.cpython-38-x86_64-linux-gnu.so CMakeFiles/QuoridorUtils.dir/src/QuoridorUtils.cpp.o 

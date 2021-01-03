@@ -1,16 +1,18 @@
 import numpy as np
 
+from alphazero_general.MCTS import MCTS
+from utils import dotdict
+from quoridorV1.pytorch.NNet import NNetWrapper as nn
+
 
 class RandomPlayer:
     def __init__(self, game):
         self.game = game
 
     def play(self, board):
-        a = np.random.randint(self.game.getActionSize())
-        valids = self.game.getValidActions(board, 1)
-        while valids[a] != 1:
-            a = np.random.randint(self.game.getActionSize())
-        return a
+        actions = self.game.getValidActions(board, 1)
+        # print(actions)
+        return np.random.choice(len(actions), p=np.array(actions) / sum(actions))
 
 
 class HumanQuoridorPlayer:
@@ -56,3 +58,30 @@ class GreedyQuoridorPlayer:
             candidates += [(-score, a)]
         candidates.sort()
         return candidates[0][1]
+
+
+class AlphaQuoridor:
+    def __init__(self, game, nn_folder, nn_name, args=None, temp=0):
+
+        self.game = game
+        if args is None:
+            self.args = dotdict({
+                'tempThreshold': 15,
+                'updateThreshold': 0.60,
+                'maxlenOfQueue': 200000,
+                'numMCTSSims': 1000,
+                'arenaCompare': 40,
+                'cpuct': 2.5,
+                'cpuct_base': 19652,
+                'cpuct_mult': 2,
+            })
+        else:
+            self.args = args
+
+        nnet = nn(self.game)
+        nnet.load_checkpoint(folder=nn_folder, filename=nn_name)
+        self.nmcts = MCTS(self.game, nnet, args)
+        self.temp = temp
+
+    def play(self, board):
+        return np.random.choice(self.game.getActionSize(), p=self.nmcts.getActionProb(board, temp=self.temp))

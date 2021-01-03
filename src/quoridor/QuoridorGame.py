@@ -12,11 +12,11 @@ class QuoridorGame(Game):
     def __init__(self, n):
         super().__init__()
         self.n = n
-        self.board_len = 2 * self.n - 1
         self.action_size = 12 + 2 * (self.n - 1) ** 2
+        self.board_len = 2 * self.n - 1
 
     def __str__(self):
-        return 'quoridor_n'+str(self.n)+'_v0'
+        return 'quoridor_n'+str(self.n)+'_v3'
 
     def getInitBoard(self):
         """
@@ -26,13 +26,6 @@ class QuoridorGame(Game):
         """
         return QuoridorBoard(self.n)
 
-    def getBoardSize(self):
-        """
-        Returns:
-            (x,y): a tuple of board dimensions
-        """
-        return self.board_len, self.board_len, 5
-
     def getActionSize(self):
         """
         Returns:
@@ -40,6 +33,9 @@ class QuoridorGame(Game):
         """
         # 4 pawn moves, 8 jumps, 64 vertical walls, 64 horizontal walls
         return self.action_size
+
+    def getBoardSize(self):
+        return (self.n, self.n, 2), (self.n-1, self.n-1, 2), 15
 
     def getNextState(self, board, player, action):
         """
@@ -121,7 +117,6 @@ class QuoridorGame(Game):
             boardString: a quick conversion of board to a string format.
                          Required by MCTS for hashing.
         """
-
         return board.getBoardHashable()
 
     def display(self, board, name=None):

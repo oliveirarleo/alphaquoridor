@@ -4,8 +4,8 @@ import coloredlogs
 
 sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
-from quoridorV3.pytorch.NNet import NNetWrapper as nn
-from quoridorV3.QuoridorGame import QuoridorGame as Game
+from quoridor.pytorch.NNet import NNetWrapper as nn
+from quoridor.QuoridorGame import QuoridorGame as Game
 from utils import *
 
 log = logging.getLogger(__name__)

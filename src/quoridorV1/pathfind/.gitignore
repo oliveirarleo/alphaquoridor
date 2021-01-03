@@ -1,5 +1,0 @@
-*.out
-*.DS_Store
-/.vscode/
-/build/Makefile
-/src/__pycache__/*

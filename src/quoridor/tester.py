@@ -1,148 +1,25 @@
-import sys
-import os
-from functools import partial
-
 import numpy as np
 import logging
-
-from tqdm import tqdm
-
-from alphazero_general.Arena import Arena
-from utils import dotdict
+import sys
 import coloredlogs
 
-from quoridor.pytorch.NNet import NNetWrapper as nn
-from quoridor.QuoridorGame import QuoridorGame as Game
+sys.path.append('quoridor/pathfind/build')
+from alphazero_general.Coach import Coach
 
-sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
-import QuoridorUtils
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
+from alphazero_general.Arena import Arena
+from quoridor.QuoridorPlayers import RandomPlayer
+from utils import dotdict
 
 from alphazero_general.MCTS import MCTS
 
 from quoridor.pytorch.NNet import NNetWrapper as nn
-from quoridor.QuoridorGame import QuoridorGame as Game, QuoridorGame
+from quoridor.QuoridorGame import QuoridorGame as Game
+import QuoridorUtils
 
 log = logging.getLogger(__name__)
 
-pawn_action_translator = {
-    'N': 0,
-    'S': 1,
-    'E': 2,
-    'W': 3,
-    'JN': 4,
-    'JS': 5,
-    'JE': 6,
-    'JW': 7,
-    'JNE': 8,
-    'JNW': 9,
-    'JSE': 10,
-    'JSW': 11,
-}
 
-
-class QuoridorEngineTester:
-
-    def __init__(self, n):
-        self.n = n
-        self.n_walls = n - 1
-
-        self.game = Game(self.n)
-
-        self.pawn_actions = 12
-        self.vwall_actions = self.pawn_actions + self.n_walls * self.n_walls
-
-    @staticmethod
-    def placeWall(game, board, player, x, y, is_vertical):
-        n_walls = game.n - 1
-        pawn_actions = 12
-        vwall_actions = pawn_actions + n_walls ** 2
-        if is_vertical:
-            print('VW: ' + str(x) + ' ' + str(y))
-            return game.getNextState(board, player, pawn_actions + y * n_walls + x)
-
-        else:
-            print('HW: ' + str(x) + ' ' + str(y))
-            return game.getNextState(board, player, vwall_actions + y * n_walls + x)
-
-    @staticmethod
-    def printValidActions(game, board, player):
-        n_walls = game.n - 1
-        pawn_actions = 12
-
-        valid_actions = game.getValidActions(board, player)
-        num_vwalls = pawn_actions + n_walls ** 2
-
-        print('Valid Moves', sum(valid_actions), '/', len(valid_actions))
-
-        pawn_moves = pawn_action_translator.keys()
-        for i, m in enumerate(pawn_moves):
-            print(m, valid_actions[i], end=', ')
-        print()
-
-        # Print vwalls
-        print('Vwalls:')
-        for i in range(n_walls-1, -1, -1):
-            print(i, end=' ')
-            for j in range(n_walls):
-                print(valid_actions[pawn_actions + n_walls * j + i], end=' ')
-            print()
-        print(' ', end=' ')
-        for i in range(n_walls):
-            print(i, end=' ')
-        print()
-
-        # Print hwalls
-        print('Hwalls:')
-        for i in range(n_walls-1, -1, -1):
-            print(i, end=' ')
-            for j in range(n_walls):
-                print(valid_actions[num_vwalls + n_walls * j + i], end=' ')
-            print()
-
-        print(' ', end=' ')
-        for i in range(n_walls):
-            print(i, end=' ')
-        print()
-
-    @staticmethod
-    def printActionType(game, board, action, player):
-        if player == 1:
-            ptype = '--Red'
-        else:
-            ptype = '--Blu'
-        n_walls = game.n - 1
-        pawn_actions = 12
-        vwall_actions = pawn_actions + n_walls ** 2
-
-        if action < pawn_actions:
-            print(ptype, 'Move', action)
-        elif action < vwall_actions:
-            print(ptype, 'VWall x:', int((action - pawn_actions) / n_walls), 'y:',
-                  (action - pawn_actions) % n_walls)
-            x = int((action - pawn_actions) / n_walls) * 2 +1
-            y = ((action - pawn_actions) % n_walls) * 2 +1
-            print(QuoridorUtils.pathExistsForPlayers((board.red_walls_board + board.blue_walls_board),
-                                                     board.red_position[0], board.red_position[1], board.red_goal[0],
-                                                     board.red_goal[1],
-                                                     board.blue_position[0], board.blue_position[1], board.blue_goal[0],
-                                                     board.blue_goal[1],
-                                                     x, y, True))
-        else:
-            print(ptype, 'HWall x:', int((action - vwall_actions) / n_walls), 'y:',
-                  (action - vwall_actions) % n_walls)
-            x = int((action - vwall_actions) / n_walls) * 2 + 1
-            y = ((action - vwall_actions) % n_walls) * 2 + 1
-            print(QuoridorUtils.pathExistsForPlayers((board.red_walls_board + board.blue_walls_board),
-                                                     board.red_position[0], board.red_position[1], board.red_goal[0],
-                                                     board.red_goal[1],
-                                                     board.blue_position[0], board.blue_position[1], board.blue_goal[0],
-                                                     board.blue_goal[1],
-                                                     x, y, True))
-
-
-def main():
+def play_games():
     args = dotdict({
         'numIters': 1000,
         'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
@@ -150,144 +27,215 @@ def main():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 40,  # Number of games moves for MCTS to simulate.
-        'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
-        'cpuct': 1,
+        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
+        'arenaCompare': 250,  # Number of games to play during arena play to determine if new net will be accepted.
+        'cpuct': 2.5,
+        'cpuct_base': 19652,
+        'cpuct_mult': 2,
 
         'checkpoint': './temp/',
         'load_model': False,
-        'load_folder_file': ('./dev/models/v0_n9', 'quoridor_n9_v0_nnetv0_torch_checkpoint_1.pth.tar'),
+        'load_folder_file': ('./dev/models/v0_n5', 'quoridor_n5_v2_nnet_v2_torch_best.pth.tar'),
         'numItersForTrainExamplesHistory': 20,
 
     })
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
     pnet = nn(g)
 
-    nnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
-    pnet.load_checkpoint(folder='/home/leleco/proj/pfg/models/v0_n9', filename='best.pth.tar')
+    nnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
+    pnet.load_checkpoint(folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/', filename='quoridor_n5_v2_nnet_v2_torch_best.pth.tar')
 
     pmcts = MCTS(g, pnet, args)
     nmcts = MCTS(g, nnet, args)
     log.info('PITTING AGAINST PREVIOUS VERSION')
-    arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
-                  lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), g, g.display)
-    pwins, nwins, draws = arena.playGames(4, verbose=True)
+    arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
+                  lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), g, g.display)
+    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=False)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
-    # game = QuoridorGame(5)
-    # board = game.getInitBoard()
-    # board, player = game.getNextState(board, 1, 0)
-    # board, player = QuoridorEngineTester.placeWall(game, board, 1, 0, 1, False)
-    # # QuoridorEngineTester.printValidActions(game, board, 1)
-    # # board, player = game.getNextState(board, -1, 3)
-    # path, len = QuoridorUtils.FindPath(board.blue_position, board.blue_goal, (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len)
-    # board.plot_board(path=path)
-    # print(path)
-    # print(board.blue_position)
-    # print(board.blue_goal)
-    # print(QuoridorUtils.PathExists(board.blue_position[0], board.blue_position[1],
-    #                                board.blue_goal[0], board.blue_goal[1], (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len))
-    # print(np.rot90(board.red_walls_board+board.blue_walls_board))
 
-    # game = QuoridorGame(5)
-    # ww = 0
-    # bw = 0
-    # for _ in tqdm(range(1), desc="Self Play"):
-    #     board = game.getInitBoard()
-    #     i = 1
-    #     while True:
-    #         # print(i)
-    #         flip = i%2==0
-    #         path, lendd = QuoridorUtils.FindPath(board.blue_position, board.blue_goal,
-    #                                            (board.red_walls_board + board.blue_walls_board), game.board_len,
-    #                                            game.board_len)
-    #         board.plot_board(path=path)
-    #         i += 1
-    #         valid_actions = game.getValidActions(board, 1)
-    #         pi = [a / sum(valid_actions) for a in valid_actions]
-    #         action = np.random.choice(len(valid_actions), p=pi)
-    #         QuoridorEngineTester.printActionType(game, board, action, 1)
-    #         # print(board.red_position)
-    #         # print(board.blue_position)
-    #         # QuoridorEngineTester.printValidActions(game, board, 1)
-    #
-    #         board, player = game.getNextState(board, 1, action)
-    #
-    #         path, lendd = QuoridorUtils.FindPath(board.blue_position, board.blue_goal,
-    #                                              (board.red_walls_board + board.blue_walls_board), game.board_len,
-    #                                              game.board_len)
-    #         board.plot_board(path=path)
-    #         # print(QuoridorUtils.PathExists(board.blue_position[0], board.blue_position[1],
-    #         #                                board.blue_goal[0], board.blue_goal[1], (board.red_walls_board+board.blue_walls_board),game.board_len,game.board_len))
-    #         #
-    #         board = game.getCanonicalForm(board, player)
-    #
-    #         if game.getGameEnded(board, 1) != 0:
-    #             # print('GAME ENDED', game.getGameEnded(board, 1))
-    #             break
-    #     # print(i)
-    #     if i % 2:
-    #         ww += 1
-    #     else:
-    #         bw += 1
-    #
-    #     board.plot_board(invert_yaxis=(not flip))
-    # print(ww, bw)
 
-    # args = dotdict({
-    #     'numIters': 1000,
-    #     'numEps': 100,  # Number of complete self-play games to simulate during a new iteration.
-    #     'tempThreshold': 15,  #
-    #     'updateThreshold': 0.6,
-    #     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
-    #     'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-    #     'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
-    #     'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
-    #     'cpuct': 1,
-    #
-    #     'checkpoint': './temp/',
-    #     'load_model': False,
-    #     'load_folder_file': ('/dev/models/8x100x50', 'best.pth.tar'),
-    #     'numItersForTrainExamplesHistory': 20,
-    #
-    # })
-    #
-    # log.info('Loading %s...', Game.__name__)
-    # game = Game(3)
-    #
-    # log.info('Loading %s...', nn.__name__)
-    # nnet = nn(game)
-    # mcts = MCTS(game, nnet, args)
-    # board = game.getInitBoard()
-    #
-    # episodeStep = 0
-    # curPlayer = 1
-    # while True:
-    #     print(episodeStep)
-    #     board.plot_board()
-    #     episodeStep += 1
-    #     canonicalBoard = game.getCanonicalForm(board, curPlayer)
-    #     temp = int(episodeStep < args.tempThreshold)
-    #
-    #     pi = mcts.getActionProb(canonicalBoard, temp=temp)
-    #     # if curPlayer == -1:
-    #     #     pi = board.piSymmetries(pi)
-    #     print('pi', pi)
-    #     la = game.getValidActions(board, curPlayer)
-    #     action = np.random.choice(len(pi), p=pi)
-    #     QuoridorEngineTester.printActionType(game, action, curPlayer)
-    #     board, curPlayer = game.getNextState(board, curPlayer, action)
-    #
-    #     r = game.getGameEnded(board, curPlayer)
-    #
-    #     if r != 0:
-    #         print('ENDE')
-    #         break
-    # board.plot_board()
+def simulate_search():
+    game = Game(5)
+    board = game.getInitBoard()
+    board.plot_board(save=False)
+
+    game_ended = game.getGameEnded(board, 1)
+    it = 0
+    while game_ended == 0:
+        it += 1
+        actions = game.getValidActions(board, 1)
+        action = np.random.choice(len(actions), p=actions / sum(actions))
+        next_s, next_player = game.getNextState(board, 1, action)
+        board = game.getCanonicalForm(next_s, next_player)
+        game_ended = game.getGameEnded(board, 1)
+        board.plot_board(invert_yaxis=(it % 2 == 0))
+
+
+def get_wall_action(n, x, y, is_vertical):
+    shift = 12 if is_vertical else 12 + (n - 1) ** 2
+
+    walls = np.zeros((n - 1, n - 1))
+    walls[x][y] = 1
+    wall = np.argmax(walls.flatten())
+    return shift + wall
+
+
+def test_moves():
+    n = 5
+    game = Game(n)
+    board = game.getInitBoard()
+    board.plot_board(save=False)
+
+    player = -1
+
+    print(player, game.getValidActions(board, player))
+    board, player = game.getNextState(board, player, 10)
+    board.plot_board(save=False)
+
+    wall = get_wall_action(n=n, x=3, y=2, is_vertical=True)
+    print(player, game.getValidActions(board, player))
+    board, player = game.getNextState(board, player, wall)
+    board.plot_board(save=False)
+
+    print(player, game.getValidActions(board, player))
+
+    # # Check flip
+    # board = game.getCanonicalForm(board, 1)
+    # board.plot_board(save=False)
+    # board = game.getCanonicalForm(board, -1)
+    # board.plot_board(save=False)
+
+
+def place_wall_and_print(game, board, x, y, isv=True):
+    wall = get_wall_action(n=game.n, x=x, y=y, is_vertical=isv)
+    board, player = game.getNextState(board, 1, wall)
+    path, length = QuoridorUtils.findPath(board.red_position, (3, board.red_goal), board.v_walls, board.h_walls)
+    # print('len', length)
+    # print(board.v_walls)
+    # print(board.h_walls)
+    board.plot_board(path=path, save=False)
+    return board
+
+
+def action_tostring(action, n):
+    pawn_action_translator = {
+        0: 'N',
+        1: 'S',
+        2: 'E',
+        3: 'W',
+        4: 'JN',
+        5: 'JS',
+        6: 'JE',
+        7: 'JW',
+        8: 'JNE',
+        9: 'JSW',
+        10: 'JNW',
+        11: 'JSE',
+    }
+    if action < 12:
+        return 'MOVE ' + pawn_action_translator[action]
+    elif action < 12 + (n - 1) ** 2:
+        shift = 12
+        return 'VWAL x:' + str((action - shift) // (n - 1)) + ' y:' + str((action - shift) % (n - 1))
+    else:
+        shift = 12 + (n - 1) ** 2
+        return 'HWAL x:' + str((action - shift) // (n - 1)) + ' y:' + str((action - shift) % (n - 1))
+
+
+def play_random_moves(n_random_moves):
+    n = 5
+    game = Game(n)
+    board = game.getInitBoard()
+
+    agent = RandomPlayer(game)
+    player = 1
+    for i in range(n_random_moves):
+        action = agent.play(board)
+        # print(action_tostring(action, n))
+        board, player = game.getNextState(board, 1, action)
+        board = game.getCanonicalForm(board, player)
+        board.plot_board(save=False, print_pm=True)
+
+
+def train():
+    log = logging.getLogger(__name__)
+
+    coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
+
+    args = dotdict({
+        'numIters': 1000,
+        'numEps': 100,  # Number of complete self-play games to simulate during a new iteration.
+        'tempThreshold': 15,  #
+        'updateThreshold': 0.60,
+        # During arena playoff, new neural net will be accepted if threshold or more of games are won.
+        'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
+        'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
+        'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
+        'cpuct': 2.5,
+        'cpuct_base': 19652,
+        'cpuct_mult': 2,
+
+        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/',
+        'load_model': False,
+        'load_examples': False,
+        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/'
+                             'quoridor_n5_v3_nnet_v2_torch_checkpoint.pth.tar'),
+        'numItersForTrainExamplesHistory': 20,
+
+    })
+
+    log.info('Loading %s...', Game.__name__)
+    g = Game(5)
+
+    log.info('Loading %s...', nn.__name__)
+    nnet = nn(g)
+
+    if args.load_model:
+        log.info('Loading checkpoint "%s/%s"...', *args.load_folder_file)
+        nnet.load_checkpoint(args.load_folder_file[0], args.load_folder_file[1])
+    else:
+        log.warning('Not loading a checkpoint!')
+
+    log.info('Loading the Coach...')
+    c = Coach(g, nnet, args)
+
+    if args.load_examples:
+        log.info("Loading 'trainExamples' from file...")
+        c.loadTrainExamples()
+
+    log.info('Starting the learning process 🎉')
+
+    c.learn()
+
+
+def place_some_walls():
+    n = 5
+    game = Game(n)
+    board = game.getInitBoard()
+    # board.plot_board(save=False)
+
+    board, player = game.getNextState(board, 1, 3)
+    board, player = game.getNextState(board, 1, 3)
+    # board = place_wall_and_print(game, board, 1, 2, False)
+    board = place_wall_and_print(game, board, 2, 1, False)
+    board = place_wall_and_print(game, board, 0, 1, False)
+
+    board, player = game.getNextState(board, 1, 2)
+    board, player = game.getNextState(board, 1, 2)
+    board.plot_board(save=False)
+
+
+def main():
+    # play_random_moves(10)
+    # place_some_walls()
+    train()
+
+    # play_games()
 
 if __name__ == "__main__":
     main()

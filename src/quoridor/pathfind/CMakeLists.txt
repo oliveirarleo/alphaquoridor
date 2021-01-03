@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.10)
-project(astar)
+project(qutils)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release")
@@ -35,4 +35,4 @@ file(GLOB HEADER_FILES include/*.h)
 
 
 # Build c++ library such that python can call it
-pybind11_add_module(QuoridorUtils src/QuoridorUtils.cpp)
+pybind11_add_module(QuoridorUtils ./QuoridorUtils.cpp)
