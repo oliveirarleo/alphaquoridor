@@ -149,7 +149,6 @@ def play_random_moves(n_random_moves):
     n = 5
     game = Game(n)
     board = game.getInitBoard()
-    board.plot_board(save=False)
 
     agent = RandomPlayer(game)
     player = 1
@@ -158,7 +157,7 @@ def play_random_moves(n_random_moves):
         # print(action_tostring(action, n))
         board, player = game.getNextState(board, 1, action)
         board = game.getCanonicalForm(board, player)
-        board.plot_board(invert_yaxis=(i % 2 == 0), save=False)
+        board.plot_board(save=False, print_pm=True)
 
 
 def train():
@@ -212,22 +211,24 @@ def train():
     c.learn()
 
 
+def place_some_walls():
+    n = 5
+    game = Game(n)
+    board = game.getInitBoard()
+    board.plot_board(save=False)
+
+    path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
+    board.plot_board(path=path, save=False)
+
+    board = place_wall_and_print(game, board, 1, 2, False)
+    board = place_wall_and_print(game, board, 2, 3, True)
+    board = place_wall_and_print(game, board, 0, 3, True)
+
+
 def main():
-    # n = 5
-    # game = QuoridorGame(n)
-    # board = game.getInitBoard()
-    # board.plot_board(save=False)
-    #
-    # path, length = QuoridorUtils.findPath(board.blue_position, (3, board.blue_goal), board.v_walls, board.h_walls)
-    # board.plot_board(path=path, save=False)
-    #
-    # board = place_wall_and_print(game, board, 1, 2, False)
-    # board = place_wall_and_print(game, board, 2, 3, True)
-    # board = place_wall_and_print(game, board, 0, 3, True)
+    play_random_moves(10)
 
-    # play_random_moves(10)
-
-    train()
+    # train()
 
 
 if __name__ == "__main__":

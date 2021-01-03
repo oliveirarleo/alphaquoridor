@@ -21,12 +21,14 @@ const int INF = std::numeric_limits<int>::max();
 
 
 // If is blocked North of player
-inline bool hasHWN(const std::vector<std::vector<int>> &hwalls, int x, int y, int board_size) {
+inline bool hasHWN(const std::vector<std::vector<int>> &hwalls, int x, int y) {
+    int board_size = (int)hwalls.size();
     return (y >= board_size) || (y<0) || (x < board_size && hwalls[x][y] == 1) || (x > 0 && hwalls[x-1][y] == 1);
 }
 
 // If is blocked East of player
-inline bool hasVWE(const std::vector<std::vector<int>> &vwalls, int x, int y, int board_size) {
+inline bool hasVWE(const std::vector<std::vector<int>> &vwalls, int x, int y) {
+    int board_size = (int)vwalls.size();
     return (x >= board_size) || (x<0) || (y < board_size && vwalls[x][y] == 1) || (y > 0 && vwalls[x][y-1] == 1);
 }
 
@@ -116,7 +118,7 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
 
     // push each possible move except allowing the search to go backwards
     // NORTH
-    if(!hasHWN(map.hwalls, x, y, map.map_width)
+    if(!hasHWN(map.hwalls, x, y)
         && !((parent_x == x) && (parent_y == y+1)))
     {
         QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y+1, map );
@@ -124,7 +126,7 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
     }
 
     // SOUTH
-    if( !hasHWN(map.hwalls, x, y-1, map.map_width)
+    if( !hasHWN(map.hwalls, x, y-1)
         && !((parent_x == x) && (parent_y == y-1)))
     {
         QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x, y-1, map );
@@ -132,14 +134,14 @@ bool QuoridorMapSearchNode::GetSuccessors( AStarSearch<QuoridorMapSearchNode> *a
     }
 
     // EAST
-    if( !hasVWE(map.vwalls, x, y, map.map_width)
+    if( !hasVWE(map.vwalls, x, y)
         && !((parent_x == x+1) && (parent_y == y)))
     {
         QuoridorMapSearchNode NewNode = QuoridorMapSearchNode( x+1, y, map );
         astarsearch->AddSuccessor( NewNode );
     }	
     // WEST
-    if( !hasVWE(map.vwalls, x-1, y, map.map_width)
+    if( !hasVWE(map.vwalls, x-1, y)
         && !((parent_x == x-1) && (parent_y == y)))
     {
         QuoridorMapSearchNode NewNode = QuoridorMapSearchNode(x-1, y, map);

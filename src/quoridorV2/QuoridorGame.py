@@ -39,7 +39,7 @@ class QuoridorGame(Game):
         Returns:
             (x,y): a tuple of board dimensions
         """
-        return self.n, self.n, 4
+        return self.n, self.n, 6
 
     def getNextState(self, board, player, action):
         """

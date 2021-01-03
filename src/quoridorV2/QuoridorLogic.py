@@ -25,6 +25,7 @@ class QuoridorBoard:
 
         self.red_goal = lastpoint
         self.blue_goal = 0
+        self.is_flipped = False
 
         if board:
             self.setBoard(board)
@@ -35,7 +36,7 @@ class QuoridorBoard:
             self.h_walls = np.zeros((self.n - 1, self.n - 1), np.int16)
             self.draw = False
 
-            self.paths = np.full((self.n, self.n), self.n ** 2)
+            self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
             self.legal_vwalls = np.ones((self.n - 1, self.n - 1), np.int16)
             self.legal_hwalls = np.ones((self.n - 1, self.n - 1), np.int16)
 
@@ -106,7 +107,7 @@ class QuoridorBoard:
             self.draw = True
 
     def getBoard(self):
-        board = np.zeros((4, self.n, self.n), dtype=int)
+        board = np.zeros((6, self.n, self.n), dtype=int)
         board[0] = self.transformWalls(self.v_walls)
         board[1] = self.transformWalls(self.h_walls)
         board[2] = self.red_board
@@ -115,6 +116,11 @@ class QuoridorBoard:
             board[3] = np.ones((self.n, self.n))
         else:
             board[3] = np.zeros((self.n, self.n))
+        board[4], board[5] = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
+
+        print(board[4])
+        print(board[5])
+
         return board
         # return self.red_board, self.blue_board, self.v_walls, self.h_walls, self.red_walls, self.blue_walls, self.draw
 
@@ -124,15 +130,6 @@ class QuoridorBoard:
             for j in range(self.n - 1):
                 res[i][j] = wall[i][j]
         return res
-
-    def getBoardDist(self, is_red=True):
-        dists = np.zeros((self.n, self.n), dtype=int)
-
-        for i in range(self.n):
-            for j in range(self.n):
-                dists[i][j] = 255
-
-        return dists
 
     def getBoardHashable(self):
         return hash((self.red_board.tostring(), self.blue_board.tostring(), self.v_walls.tostring(),
@@ -145,9 +142,11 @@ class QuoridorBoard:
         self.v_walls = np.array(board.v_walls, copy=True)
         self.h_walls = np.array(board.h_walls, copy=True)
         self.draw = board.draw
+        self.paths_red = np.array(board.paths_red, copy=True)
+        self.paths_blue = np.array(board.paths_blue, copy=True)
+        self.is_flipped = board.is_flipped
 
         # if board.paths is not None:
-        self.paths = np.array(board.paths, copy=True)
 
         # if board.legal_vwalls is not None:
         self.legal_vwalls = np.array(board.legal_vwalls, copy=True)
@@ -164,13 +163,14 @@ class QuoridorBoard:
         self.blue_goal = board.blue_goal
 
     def flipBoard(self):
+        self.is_flipped = not self.is_flipped
         self.red_position, self.blue_position = (self.n - 1 - self.blue_position[0],
                                                  self.n - 1 - self.blue_position[1]), \
                                                 (self.n - 1 - self.red_position[0],
                                                  self.n - 1 - self.red_position[1])
         self.red_walls, self.blue_walls = self.blue_walls, self.red_walls
-
         self.red_board, self.blue_board = self.blue_board, self.red_board
+        # self.paths_blue, self.paths_red = self.paths_red, self.paths_blue
 
         self.red_board = np.flip(self.red_board, (0, 1))
         self.blue_board = np.flip(self.blue_board, (0, 1))
@@ -178,6 +178,8 @@ class QuoridorBoard:
         self.h_walls = np.flip(self.h_walls, (0, 1))
         self.legal_vwalls = np.flip(self.legal_vwalls, (0, 1))
         self.legal_hwalls = np.flip(self.legal_hwalls, (0, 1))
+        self.paths_red = np.flip(self.paths_red, (0, 1))
+        self.paths_blue = np.flip(self.paths_blue, (0, 1))
 
     def makeCanonical(self, player):
         if player != 1:
@@ -192,7 +194,7 @@ class QuoridorBoard:
             if self.red_walls > 0:
                 wall_actions = list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
             else:
-                wall_actions = 2*(self.n-1)**2 * [0]
+                wall_actions = 2 * (self.n - 1) ** 2 * [0]
         else:
             pawn_actions = QuoridorUtils.getPawnActions(self.blue_position[0], self.blue_position[1],
                                                         self.red_position[0], self.red_position[1],
@@ -200,7 +202,7 @@ class QuoridorBoard:
             if self.blue_walls > 0:
                 wall_actions = list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
             else:
-                wall_actions = 2*(self.n-1)**2 * [0]
+                wall_actions = 2 * (self.n - 1) ** 2 * [0]
 
         actions = pawn_actions + wall_actions
         if sum(actions) == 0:
@@ -220,18 +222,22 @@ class QuoridorBoard:
         if 0 <= action < pawn_moves:
             x, y = self.red_position if player == 1 else self.blue_position
             self.actions[action](player, x, y)
-
-        # Vertical Walls
-        elif pawn_moves <= action < vertical_wall_moves:
-            x = int((action - pawn_moves) / (self.n - 1))
-            y = int((action - pawn_moves) % (self.n - 1))
-            self.actions['vw'](player, x, y)
-
-        # Horizontal Walls
         else:
-            x = int((action - vertical_wall_moves) / (self.n - 1))
-            y = int((action - vertical_wall_moves) % (self.n - 1))
-            self.actions['hw'](player, x, y)
+            # Vertical Walls
+            if pawn_moves <= action < vertical_wall_moves:
+                x = int((action - pawn_moves) / (self.n - 1))
+                y = int((action - pawn_moves) % (self.n - 1))
+                self.actions['vw'](player, x, y)
+            # Horizontal Walls
+            else:
+                x = int((action - vertical_wall_moves) / (self.n - 1))
+                y = int((action - vertical_wall_moves) % (self.n - 1))
+                self.actions['hw'](player, x, y)
+
+        if self.is_flipped:
+            self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
+        else:
+            self.paths_blue, self.paths_red = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
 
         self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
             self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
@@ -266,7 +272,7 @@ class QuoridorBoard:
 
         self.h_walls[x, y] = 1
 
-    def plot_board(self, invert_yaxis=False, path=None, name=None, save=True, print_lw=True):
+    def plot_board(self, invert_yaxis=False, path=None, name=None, save=True, print_lw=True, print_pm=False):
         if path is None:
             path = []
         if name is None:
@@ -274,15 +280,14 @@ class QuoridorBoard:
 
         fig_map, ax_map = plt.subplots(1, 1)
 
-        if invert_yaxis:
-            color1 = 'tab:red'
-            color2 = 'tab:blue'
-            color2w = 'gray'
+        if self.is_flipped:
+            color_red_board = 'tab:blue'
+            color_blue_board = 'tab:red'
         else:
-            color1 = 'tab:blue'
-            color2 = 'tab:red'
-            color2w = 'gray'
+            color_red_board = 'tab:red'
+            color_blue_board = 'tab:blue'
 
+        color2w = 'gray'
         board_len = self.n * 2 - 1
         for y in range(board_len):
             for x in range(board_len):
@@ -325,12 +330,19 @@ class QuoridorBoard:
                 elif x % 2 == 0 and y % 2 == 0:
                     # Red Player
                     if self.red_board[x // 2, y // 2] == 1:
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color2)
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_red_board)
                         ax_map.add_patch(rect)
                     # Blue Player
                     if self.blue_board[x // 2, y // 2] == 1:
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color1)
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board)
                         ax_map.add_patch(rect)
+                    if print_pm:
+                        s = str(self.paths_red[x // 2][y // 2]) + ' ' + str(self.paths_blue[x // 2][y // 2])
+                        ax_map.text(x + 0.5, y + 0.5, s,
+                                    verticalalignment='center',
+                                    horizontalalignment='center',
+                                    fontsize=15,
+                                    fontweight='bold')
 
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):
@@ -345,9 +357,10 @@ class QuoridorBoard:
         ax_map.set_xlim([0, board_len])
         ax_map.set_ylim([0, board_len])
 
-        if invert_yaxis:
+        if self.is_flipped:
             ax_map.invert_yaxis()
             ax_map.invert_xaxis()
+
 
         if save:
             if not os.path.exists('./games'):
