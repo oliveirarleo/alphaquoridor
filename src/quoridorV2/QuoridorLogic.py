@@ -116,13 +116,9 @@ class QuoridorBoard:
             board[3] = np.ones((self.n, self.n))
         else:
             board[3] = np.zeros((self.n, self.n))
-        board[4], board[5] = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
-
-        print(board[4])
-        print(board[5])
+        board[4], board[5] = self.paths_red, self.paths_blue
 
         return board
-        # return self.red_board, self.blue_board, self.v_walls, self.h_walls, self.red_walls, self.blue_walls, self.draw
 
     def transformWalls(self, wall):
         res = np.zeros((self.n, self.n))
@@ -170,7 +166,7 @@ class QuoridorBoard:
                                                  self.n - 1 - self.red_position[1])
         self.red_walls, self.blue_walls = self.blue_walls, self.red_walls
         self.red_board, self.blue_board = self.blue_board, self.red_board
-        # self.paths_blue, self.paths_red = self.paths_red, self.paths_blue
+        self.paths_blue, self.paths_red = self.paths_red, self.paths_blue
 
         self.red_board = np.flip(self.red_board, (0, 1))
         self.blue_board = np.flip(self.blue_board, (0, 1))
@@ -234,10 +230,10 @@ class QuoridorBoard:
                 y = int((action - vertical_wall_moves) % (self.n - 1))
                 self.actions['hw'](player, x, y)
 
-        if self.is_flipped:
-            self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
-        else:
-            self.paths_blue, self.paths_red = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
+        # if self.is_flipped:
+        self.paths_red, self.paths_blue = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
+        # else:
+        #     self.paths_blue, self.paths_red = QuoridorUtils.getPathMatrices(self.v_walls, self.h_walls)
 
         self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
             self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
@@ -272,7 +268,7 @@ class QuoridorBoard:
 
         self.h_walls[x, y] = 1
 
-    def plot_board(self, invert_yaxis=False, path=None, name=None, save=True, print_lw=True, print_pm=False):
+    def plot_board(self, path=None, name=None, save=True, print_lw=True, print_pm=False):
         if path is None:
             path = []
         if name is None:
@@ -337,7 +333,10 @@ class QuoridorBoard:
                         rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board)
                         ax_map.add_patch(rect)
                     if print_pm:
-                        s = str(self.paths_red[x // 2][y // 2]) + ' ' + str(self.paths_blue[x // 2][y // 2])
+                        if self.is_flipped:
+                            s = str(self.paths_blue[x // 2][y // 2]) + ' ' + str(self.paths_red[x // 2][y // 2])
+                        else:
+                            s = str(self.paths_red[x // 2][y // 2]) + ' ' + str(self.paths_blue[x // 2][y // 2])
                         ax_map.text(x + 0.5, y + 0.5, s,
                                     verticalalignment='center',
                                     horizontalalignment='center',
@@ -360,7 +359,6 @@ class QuoridorBoard:
         if self.is_flipped:
             ax_map.invert_yaxis()
             ax_map.invert_xaxis()
-
 
         if save:
             if not os.path.exists('./games'):
