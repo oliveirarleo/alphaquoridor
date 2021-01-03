@@ -4,8 +4,8 @@ import coloredlogs
 
 sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
-from quoridorV1.pytorch.NNet import NNetWrapper as nn
-from quoridorV1.QuoridorGame import QuoridorGame as Game
+from quoridorV2.pytorch.NNet import NNetWrapper as nn
+from quoridorV2.QuoridorGame import QuoridorGame as Game
 from utils import *
 
 log = logging.getLogger(__name__)
@@ -25,8 +25,8 @@ args = dotdict({
     'cpuct_base': 19652,
     'cpuct_mult': 2,
 
-    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/',
-    'load_model': True,
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/',
+    'load_model': False,
     'load_examples': False,
     'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/', 'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),
     'numItersForTrainExamplesHistory': 20,

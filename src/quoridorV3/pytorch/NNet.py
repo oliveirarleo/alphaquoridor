@@ -35,7 +35,7 @@ class NNetWrapper(NeuralNet):
             self.nnet.cuda()
 
     def __str__(self):
-        return 'nnet_v1_torch'
+        return 'nnet_v2_torch'
 
     def train(self, examples):
         """
