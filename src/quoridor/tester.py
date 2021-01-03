@@ -10,7 +10,7 @@ from alphazero_general.Arena import Arena
 from quoridor.QuoridorPlayers import RandomPlayer
 from utils import dotdict
 
-from alphazero_general.MCTS import MCTS
+from quoridor.MCTSQuoridor import MCTS
 
 from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.QuoridorGame import QuoridorGame as Game
@@ -162,7 +162,7 @@ def play_random_moves(n_random_moves):
         board.plot_board(save=False, print_pm=True)
 
 
-def train():
+def train(n=5):
     log = logging.getLogger(__name__)
 
     coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
@@ -183,14 +183,13 @@ def train():
         'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/',
         'load_model': False,
         'load_examples': False,
-        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/'
+        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/'
                              'quoridor_n5_v3_nnet_v2_torch_checkpoint.pth.tar'),
         'numItersForTrainExamplesHistory': 20,
-
     })
 
     log.info('Loading %s...', Game.__name__)
-    g = Game(5)
+    g = Game(n)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
@@ -233,7 +232,7 @@ def place_some_walls():
 def main():
     # play_random_moves(10)
     # place_some_walls()
-    train()
+    train(9)
 
     # play_games()
 

@@ -120,7 +120,13 @@ class QuoridorBoard:
         walls[1] = self.h_walls
 
         # Values
-        values = np.append(self.shortestPathActions(), [float(self.draw), self.red_walls/self.max_walls, self.blue_walls/self.max_walls])
+        values = np.append(self.shortestPathActions(),
+                           [self.red_walls / self.max_walls, self.blue_walls / self.max_walls,
+                            ((self.n ** 2 + 1) - self.paths_red[self.red_position[0]][self.red_position[1]]) / (
+                                        self.n ** 2 + 1),
+                            ((self.n ** 2 + 1) - self.paths_blue[self.blue_position[0]][self.blue_position[1]]) / (
+                                        self.n ** 2 + 1),
+                            float(self.draw)])
         return boards, walls, values
 
     def shortestPathActions(self):
@@ -155,25 +161,12 @@ class QuoridorBoard:
             11: (+1, -1),
         }
 
-        # min_idx = []
-        # min_val = self.n * self.n + 1
-        # for i, p in enumerate(pawn_actions):
-        #     v = self.paths_red[self.red_position[0]][self.red_position[1]]
-        #     if p == 1:
-        #         if min_val > v:
-        #             min_val = v
-        #             min_idx = [i]
-        #         elif min_val == v:
-        #             min_idx.append(i)
-
         action_dists = np.zeros(12, dtype=float)
         for i, p in enumerate(pawn_actions):
             if p == 1:
                 x = self.red_position[0] + pawn_translations[i][0]
                 y = self.red_position[1] + pawn_translations[i][1]
                 action_dists[i] = ((self.n ** 2 + 1) - self.paths_red[x][y]) / (self.n ** 2 + 1)
-        # self.plot_board(save=False, print_pm=True)
-        # print(action_dists)
         return action_dists
 
     def transformWalls(self, wall):
@@ -184,8 +177,8 @@ class QuoridorBoard:
         return res
 
     def getBoardHashable(self):
-        return (self.red_position, self.blue_position, self.v_walls.tostring(),
-                     self.h_walls.tostring(), self.draw, self.red_walls, self.blue_walls)
+        return (self.red_position, self.blue_position, self.red_walls, self.blue_walls, self.v_walls.tostring(),
+                self.h_walls.tostring(), self.draw)
 
     def setBoard(self, board):
         self.history = copy.deepcopy(board.history)
@@ -364,11 +357,13 @@ class QuoridorBoard:
                 elif x % 2 == 0 and y % 2 == 0:
                     # Red Player
                     if self.red_position == (x // 2, y // 2):
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_red_board, label=str(self.red_walls))
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_red_board,
+                                                 label=str(self.red_walls))
                         ax_map.add_patch(rect)
                     # Blue Player
                     if self.blue_position == (x // 2, y // 2):
-                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board, label=str(self.blue_walls))
+                        rect = patches.Rectangle((x, y), 1, 1, linewidth=0, facecolor=color_blue_board,
+                                                 label=str(self.blue_walls))
                         ax_map.add_patch(rect)
                     if print_pm:
                         if flipped:
@@ -381,7 +376,7 @@ class QuoridorBoard:
                                     fontsize=15,
                                     fontweight='bold')
 
-        ax_map.legend(bbox_to_anchor=(1,1), loc="upper left")
+        ax_map.legend(bbox_to_anchor=(1, 1), loc="upper left")
 
         points = list(zip(path, path[1:]))[::2]
         for i, p in enumerate(points):

@@ -35,7 +35,7 @@ class QuoridorGame(Game):
         return self.action_size
 
     def getBoardSize(self):
-        return (self.n, self.n, 2), (self.n-1, self.n-1, 2), 15
+        return (self.n, self.n, 2), (self.n-1, self.n-1, 2), 17
 
     def getNextState(self, board, player, action):
         """

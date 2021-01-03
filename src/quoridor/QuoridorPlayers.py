@@ -2,7 +2,7 @@ import numpy as np
 
 from alphazero_general.MCTS import MCTS
 from utils import dotdict
-from quoridorV1.pytorch.NNet import NNetWrapper as nn
+from quoridor.pytorch.NNet import NNetWrapper as nn
 
 
 class RandomPlayer:
