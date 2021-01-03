@@ -7,13 +7,13 @@ sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
 
 from alphazero_general.Arena import Arena
-from quoridorV2.QuoridorPlayers import RandomPlayer
+from quoridorV3.QuoridorPlayers import RandomPlayer
 from utils import dotdict
 
 from alphazero_general.MCTS import MCTS
 
-from quoridorV2.pytorch.NNet import NNetWrapper as nn
-from quoridorV2.QuoridorGame import QuoridorGame as Game
+from quoridorV3.pytorch.NNet import NNetWrapper as nn
+from quoridorV3.QuoridorGame import QuoridorGame as Game
 import QuoridorUtils
 
 log = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def play_games():
 
     })
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)
@@ -172,7 +172,7 @@ def train():
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 25,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 50,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
@@ -226,9 +226,9 @@ def place_some_walls():
 
 
 def main():
-    play_random_moves(10)
+    # play_random_moves(10)
 
-    # train()
+    train()
 
 
 if __name__ == "__main__":

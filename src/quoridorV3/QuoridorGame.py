@@ -35,11 +35,7 @@ class QuoridorGame(Game):
         return self.action_size
 
     def getBoardSize(self):
-        """
-        Returns:
-            (x,y): a tuple of board dimensions
-        """
-        return self.n, self.n, 6
+        return (self.n, self.n, 2), (self.n-1, self.n-1, 2), 15
 
     def getNextState(self, board, player, action):
         """

@@ -103,7 +103,7 @@ class QuoridorBoard:
             self.draw = True
 
     def getBoard(self):
-        board = np.zeros((6, self.n, self.n), dtype=int)
+        board = np.zeros((6, self.n, self.n), dtype=float)
         board[0] = self.transformWalls(self.v_walls)
         board[1] = self.transformWalls(self.h_walls)
 
@@ -120,7 +120,7 @@ class QuoridorBoard:
             board[3] = np.ones((self.n, self.n))
         else:
             board[3] = np.zeros((self.n, self.n))
-        board[4], board[5] = self.paths_red, self.paths_blue
+        board[4], board[5] = self.paths_red/(self.n**2+1), self.paths_blue/(self.n**2+1)
 
         return board
 

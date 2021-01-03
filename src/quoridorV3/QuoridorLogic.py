@@ -27,6 +27,7 @@ class QuoridorBoard:
         self.blue_goal = 0
         self.is_flipped = False
 
+        self.max_walls = (self.n + 1) ** 2 // 10
         if board:
             self.setBoard(board)
         else:
@@ -38,7 +39,6 @@ class QuoridorBoard:
             self.legal_vwalls = np.ones((self.n - 1, self.n - 1), np.int16)
             self.legal_hwalls = np.ones((self.n - 1, self.n - 1), np.int16)
 
-            self.max_walls = (self.n + 1) ** 2 // 10
             # red player
             self.red_position = (midpoint_red, 0)
             self.red_walls = self.max_walls
@@ -103,26 +103,78 @@ class QuoridorBoard:
             self.draw = True
 
     def getBoard(self):
-        board = np.zeros((6, self.n, self.n), dtype=int)
-        board[0] = self.transformWalls(self.v_walls)
-        board[1] = self.transformWalls(self.h_walls)
-
+        # Boards
+        boards = np.zeros((2, self.n, self.n), dtype=int)
         # Red position
         red_board = np.zeros((self.n, self.n))
         red_board[self.red_position[0], self.red_position[1]] = 1
-        board[2] = red_board
-
+        boards[0] = red_board
         # Blue position
         blue_board = np.zeros((self.n, self.n))
         blue_board[self.blue_position[0], self.blue_position[1]] = 1
-        board[3] = blue_board
-        if self.draw:
-            board[3] = np.ones((self.n, self.n))
-        else:
-            board[3] = np.zeros((self.n, self.n))
-        board[4], board[5] = self.paths_red, self.paths_blue
+        boards[1] = blue_board
 
-        return board
+        # Walls
+        walls = np.zeros((2, self.n - 1, self.n - 1), dtype=int)
+        walls[0] = self.v_walls
+        walls[1] = self.h_walls
+
+        # Values
+        values = np.append(self.shortestPathActions(), [float(self.draw), self.red_walls/self.max_walls, self.blue_walls/self.max_walls])
+        return boards, walls, values
+
+    def shortestPathActions(self):
+
+        pawn_actions = QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
+                                                    self.blue_position[0], self.blue_position[1],
+                                                    self.v_walls, self.h_walls)
+        pawn_translations = {
+            # NORTH
+            0: (+0, +1),
+            # SO
+            1: (+0, -1),
+            # EA
+            2: (+1, +0),
+            # WE
+            3: (-1, +0),
+            # JN
+            4: (+0, +2),
+            # JS
+            5: (+0, -2),
+            # JE
+            6: (+2, +0),
+            # JW
+            7: (-2, +0),
+            # JNE
+            8: (+1, +1),
+            # JSW
+            9: (-1, -1),
+            # JNW
+            10: (-1, +1),
+            # JSE
+            11: (+1, -1),
+        }
+
+        # min_idx = []
+        # min_val = self.n * self.n + 1
+        # for i, p in enumerate(pawn_actions):
+        #     v = self.paths_red[self.red_position[0]][self.red_position[1]]
+        #     if p == 1:
+        #         if min_val > v:
+        #             min_val = v
+        #             min_idx = [i]
+        #         elif min_val == v:
+        #             min_idx.append(i)
+
+        action_dists = np.zeros(12, dtype=float)
+        for i, p in enumerate(pawn_actions):
+            if p == 1:
+                x = self.red_position[0] + pawn_translations[i][0]
+                y = self.red_position[1] + pawn_translations[i][1]
+                action_dists[i] = ((self.n ** 2 + 1) - self.paths_red[x][y]) / (self.n ** 2 + 1)
+        # self.plot_board(save=False, print_pm=True)
+        # print(action_dists)
+        return action_dists
 
     def transformWalls(self, wall):
         res = np.zeros((self.n, self.n))
@@ -303,9 +355,9 @@ class QuoridorBoard:
                         ax_map.add_patch(rect)
                     if print_lw:
                         s = ''
-                        if self.legal_vwalls[(x + 1) // 2 - 1, (y + 1) // 2 - 1] == 1:
+                        if self.legal_vwalls[(x + 1) // 2 - 1][(y + 1) // 2 - 1] == 1:
                             s += 'V'
-                        if self.legal_hwalls[(x + 1) // 2 - 1, (y + 1) // 2 - 1] == 1:
+                        if self.legal_hwalls[(x + 1) // 2 - 1][(y + 1) // 2 - 1] == 1:
                             s += 'H'
                         if s != '':
                             ax_map.text(x + 0.5, y + 0.5, s,

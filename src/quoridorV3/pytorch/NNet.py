@@ -28,7 +28,7 @@ class NNetWrapper(NeuralNet):
     def __init__(self, game):
         super().__init__(game)
         self.nnet = qnnet(game, args)
-        self.board_x, self.board_y, self.board_z = game.getBoardSize()
+        self.boards, self.walls, self.values = game.getBoardSize()
         self.action_size = game.getActionSize()
 
         if args.cuda:
@@ -54,17 +54,29 @@ class NNetWrapper(NeuralNet):
             t = tqdm(range(batch_count), desc='Training Net')
             for _ in t:
                 sample_ids = np.random.randint(len(examples), size=args.batch_size)
-                boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
+                nn_input, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
+                # print(pis)
+                # print(vs)
+                boards, walls, values = list(zip(*[i for i in nn_input]))
+                # print(boards)
+                # print(walls)
+                # print(values)
                 boards = torch.FloatTensor(np.array(boards).astype(np.float64))
+                walls = torch.FloatTensor(np.array(walls).astype(np.float64))
+                values = torch.FloatTensor(np.array(values).astype(np.float64))
                 target_pis = torch.FloatTensor(np.array(pis))
                 target_vs = torch.FloatTensor(np.array(vs).astype(np.float64))
 
                 # predict
                 if args.cuda:
-                    boards, target_pis, target_vs = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda()
+                    boards = boards.contiguous().cuda()
+                    walls = walls.contiguous().cuda()
+                    values = values.contiguous().cuda()
+                    target_pis = target_pis.contiguous().cuda()
+                    target_vs = target_vs.contiguous().cuda()
 
                 # compute output
-                out_pi, out_v = self.nnet(boards)
+                out_pi, out_v = self.nnet(boards, walls, values)
                 l_pi = self.loss_pi(target_pis, out_pi)
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v
@@ -83,14 +95,21 @@ class NNetWrapper(NeuralNet):
         """
         board: np array with board
         """
-
+        board, wall, value = board.getBoard()
         # preparing input
-        board = torch.FloatTensor(board.getBoard().astype(np.float64))
-        if args.cuda: board = board.contiguous().cuda()
-        board = board.view(self.board_z, self.board_x, self.board_y)
+        board = torch.FloatTensor(board.astype(np.float64))
+        wall = torch.FloatTensor(wall.astype(np.float64))
+        value = torch.FloatTensor(value.astype(np.float64))
+        if args.cuda:
+            board = board.contiguous().cuda()
+            wall = wall.contiguous().cuda()
+            value = value.contiguous().cuda()
+        board = board.view(self.boards[2], self.boards[0], self.boards[1])
+        wall = wall.view(self.walls[2], self.walls[0], self.walls[1])
+        value = value.view(self.values)
         self.nnet.eval()
         with torch.no_grad():
-            pi, v = self.nnet(board)
+            pi, v = self.nnet(board, wall, value)
 
         # print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
