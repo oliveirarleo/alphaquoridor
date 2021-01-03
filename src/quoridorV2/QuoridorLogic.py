@@ -189,22 +189,31 @@ class QuoridorBoard:
             pawn_actions = QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
                                                         self.blue_position[0], self.blue_position[1],
                                                         self.v_walls, self.h_walls)
+            if self.red_walls > 0:
+                wall_actions = list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
+            else:
+                wall_actions = 2*(self.n-1)**2 * [0]
         else:
             pawn_actions = QuoridorUtils.getPawnActions(self.blue_position[0], self.blue_position[1],
                                                         self.red_position[0], self.red_position[1],
                                                         self.v_walls, self.h_walls)
-        # print(pawn_actions)
-        # print(np.concatenate((self.legal_vwalls, self.legal_hwalls)))
-        # print(pawn_actions + list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten()))))
-        # print(self.legal_vwalls)
-        # print(self.legal_hwalls)
-        return pawn_actions + list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
+            if self.blue_walls > 0:
+                wall_actions = list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
+            else:
+                wall_actions = 2*(self.n-1)**2 * [0]
+
+        actions = pawn_actions + wall_actions
+        if sum(actions) == 0:
+            self.plot_board(save=False)
+        return actions
 
     def executeAction(self, player, action):
         self.addToHistory()
         pawn_moves = 12
         vertical_wall_moves = pawn_moves + (self.n - 1) ** 2
+        num_walls = self.red_walls
         if player == -1:
+            num_walls = self.blue_walls
             action = self.convert_action[action]
 
         # Pawn Moves
@@ -217,21 +226,18 @@ class QuoridorBoard:
             x = int((action - pawn_moves) / (self.n - 1))
             y = int((action - pawn_moves) % (self.n - 1))
             self.actions['vw'](player, x, y)
-            self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
-                self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
-                self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
-                self.legal_vwalls, self.legal_hwalls,
-                self.v_walls, self.h_walls, self.red_walls)
+
         # Horizontal Walls
         else:
             x = int((action - vertical_wall_moves) / (self.n - 1))
             y = int((action - vertical_wall_moves) % (self.n - 1))
             self.actions['hw'](player, x, y)
-            self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
-                self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
-                self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
-                self.legal_vwalls, self.legal_hwalls,
-                self.v_walls, self.h_walls, self.red_walls)
+
+        self.legal_vwalls, self.legal_hwalls = QuoridorUtils.updateWallActions(
+            self.red_position[0], self.red_position[1], self.n // 2, self.red_goal,
+            self.blue_position[0], self.blue_position[1], self.n // 2, self.blue_goal,
+            self.legal_vwalls, self.legal_hwalls,
+            self.v_walls, self.h_walls)
 
     def move(self, player, x, y, dx=0, dy=0):
         if player == 1:

@@ -30,7 +30,7 @@ void printBoard(const std::vector<std::vector<int>> &board) {
 //    return (x >= board_size) || (x<0) || (y < board_size && vwalls[x][y] == 1) || (y > 0 && vwalls[x][y-1] == 1);
 //}
 
-void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
+inline void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
                     const std::vector<std::vector<int>> &vwalls, const std::vector<std::vector<int>> &hwalls,
                     std::vector<int> &actions) {
     const int N = 0;
@@ -144,7 +144,7 @@ void setPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
     }
 }
 
-std::vector<int> getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
+inline std::vector<int> getPawnActions(int player_x, int player_y, int opponent_x, int opponent_y,
                                 const std::vector<std::vector<int>> &vwalls,
                                 const std::vector<std::vector<int>> &hwalls) {
     std::vector<int> actions(12, 0);
@@ -313,7 +313,7 @@ inline std::tuple<std::vector<int>, int> findPath(
 }
 
 
-bool canPlaceWall(int px, int py, int pgx, int pgy,
+inline bool canPlaceWall(int px, int py, int pgx, int pgy,
                   int ox, int oy, int ogx, int ogy,
                   int wx, int wy, bool is_vertical,
                   std::vector<std::vector<int>> &vwalls,
@@ -333,7 +333,7 @@ bool canPlaceWall(int px, int py, int pgx, int pgy,
     return res;
 }
 
-void setWallActions(int px, int py, int pgx, int pgy,
+inline void setWallActions(int px, int py, int pgx, int pgy,
                     int ox, int oy, int ogx, int ogy,
                     std::vector<std::vector<int>> &vwalls,
                     std::vector<std::vector<int>> &hwalls,
@@ -405,7 +405,7 @@ void setWallActions(int px, int py, int pgx, int pgy,
     }
 }
 
-void updateWallActions_(int px, int py, int pgx, int pgy,
+inline void updateWallActions_(int px, int py, int pgx, int pgy,
                         int ox, int oy, int ogx, int ogy,
                         std::vector<std::vector<int>> &vwalls,
                         std::vector<std::vector<int>> &hwalls,
@@ -479,7 +479,7 @@ void updateWallActions_(int px, int py, int pgx, int pgy,
     }
 }
 
-std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+inline std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
 getWallActions(int px, int py, int pgx, int pgy,
                int ox, int oy, int ogx, int ogy,
                std::vector<std::vector<int>> &vwalls,
@@ -495,28 +495,26 @@ getWallActions(int px, int py, int pgx, int pgy,
     return {vwall_actions, hwall_actions};
 }
 
-std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
+inline std::tuple<std::vector<std::vector<int>>, std::vector<std::vector<int>>>
 updateWallActions(int px, int py, int pgx, int pgy,
                   int ox, int oy, int ogx, int ogy,
                   const std::vector<std::vector<int>> &old_legal_vwall_actions,
                   const std::vector<std::vector<int>> &old_legal_hwall_actions,
                   std::vector<std::vector<int>> &vwalls,
-                  std::vector<std::vector<int>> &hwalls,
-                  int num_walls) {
+                  std::vector<std::vector<int>> &hwalls) {
 
     int board_size = (int) vwalls.size();
     std::vector<std::vector<int>> vwall_actions(board_size, std::vector<int>(board_size, 0));
     std::vector<std::vector<int>> hwall_actions(board_size, std::vector<int>(board_size, 0));
-    if (num_walls > 0)
-        updateWallActions_(px, py, pgx, pgy, ox, oy, ogx, ogy,
-                           vwalls, hwalls,
-                           old_legal_vwall_actions, old_legal_hwall_actions,
-                           vwall_actions, hwall_actions);
+    updateWallActions_(px, py, pgx, pgy, ox, oy, ogx, ogy,
+                       vwalls, hwalls,
+                       old_legal_vwall_actions, old_legal_hwall_actions,
+                       vwall_actions, hwall_actions);
 
     return {vwall_actions, hwall_actions};
 }
 
-std::vector<int> getValidActions(int px, int py, int pgx, int pgy,
+inline std::vector<int> getValidActions(int px, int py, int pgx, int pgy,
                                  int ox, int oy, int ogx, int ogy,
                                  std::vector<std::vector<int>> &vwalls,
                                  std::vector<std::vector<int>> &hwalls,
@@ -543,8 +541,9 @@ std::vector<int> getValidActions(int px, int py, int pgx, int pgy,
     }
 
     return actions;
-
 }
+
+
 
 inline PYBIND11_MODULE(QuoridorUtils, module) {
     module.doc() = "Quoridor Utils for engine V2";

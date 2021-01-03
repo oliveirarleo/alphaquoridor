@@ -168,7 +168,7 @@ def train():
 
     args = dotdict({
         'numIters': 1000,
-        'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
+        'numEps': 100,  # Number of complete self-play games to simulate during a new iteration.
         'tempThreshold': 15,  #
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -179,7 +179,7 @@ def train():
         'cpuct_base': 19652,
         'cpuct_mult': 2,
 
-        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/',
+        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/',
         'load_model': False,
         'load_examples': False,
         'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/',
@@ -225,9 +225,9 @@ def main():
     # board = place_wall_and_print(game, board, 2, 3, True)
     # board = place_wall_and_print(game, board, 0, 3, True)
 
-    play_random_moves(10)
+    # play_random_moves(10)
 
-    # train()
+    train()
 
 
 if __name__ == "__main__":
