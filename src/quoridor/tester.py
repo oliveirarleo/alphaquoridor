@@ -17,7 +17,7 @@ from quoridor.QuoridorGame import QuoridorGame as Game
 import QuoridorUtils
 
 log = logging.getLogger(__name__)
-
+coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 def play_games(n=5,
                p1='quoridor_n5_v3_nnet_v2_torch_best.pth.tar',
@@ -59,7 +59,7 @@ def play_games(n=5,
     log.info('PITTING AGAINST PREVIOUS VERSION')
     arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=1)),
                   lambda x: np.argmax(nmcts.getActionProb(x, temp=1)), g, g.display)
-    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=False)
+    pwins, nwins, draws = arena.playGames(args.arenaCompare, verbose=True)
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
@@ -170,7 +170,6 @@ def play_random_moves(n_random_moves):
 def train(n=5):
     log = logging.getLogger(__name__)
 
-    coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
     args = dotdict({
         'numIters': 1000,
@@ -185,11 +184,11 @@ def train(n=5):
         'cpuct_base': 19652,
         'cpuct_mult': 2,
 
-        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/',
+        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n'+str(n)+'_v3/',
         'load_model': False,
         'load_examples': False,
-        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n9_v3/'
-                             'quoridor_n5_v3_nnet_v2_torch_checkpoint.pth.tar'),
+        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n'+str(n)+'_v3/'
+                             'quoridor_n'+str(n)+'_v3_nnet_v2_torch_checkpoint.pth.tar'),
         'numItersForTrainExamplesHistory': 20,
     })
 

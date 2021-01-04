@@ -14,26 +14,27 @@ class QuoridorNNet(nn.Module):
         self.args = args
 
         super(QuoridorNNet, self).__init__()
-        self.conv1 = nn.Conv2d(self.boards[2], args.num_channels, 3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1, padding=1)
-        self.conv3 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
-        self.conv4 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
+        self.conv1 = nn.Conv2d(self.boards[2], self.args.num_channels, 3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(self.args.num_channels, self.args.num_channels, 3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(self.args.num_channels, self.args.num_channels, 3, stride=1)
+        self.conv4 = nn.Conv2d(self.args.num_channels, self.args.num_channels, 3, stride=1)
 
-        self.conv5 = nn.Conv2d(self.walls[2], args.num_channels, 3, stride=1, padding=1)
-        self.conv6 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1, padding=1)
-        self.conv7 = nn.Conv2d(args.num_channels, args.num_channels, 3, stride=1)
+        self.conv5 = nn.Conv2d(self.walls[2], self.args.num_channels, 3, stride=1, padding=1)
+        self.conv6 = nn.Conv2d(self.args.num_channels, self.args.num_channels, 3, stride=1, padding=1)
+        self.conv7 = nn.Conv2d(self.args.num_channels, self.args.num_channels, 3, stride=1)
 
-        self.bn1 = nn.BatchNorm2d(args.num_channels)
-        self.bn2 = nn.BatchNorm2d(args.num_channels)
-        self.bn3 = nn.BatchNorm2d(args.num_channels)
-        self.bn4 = nn.BatchNorm2d(args.num_channels)
+        self.bn1 = nn.BatchNorm2d(self.args.num_channels)
+        self.bn2 = nn.BatchNorm2d(self.args.num_channels)
+        self.bn3 = nn.BatchNorm2d(self.args.num_channels)
+        self.bn4 = nn.BatchNorm2d(self.args.num_channels)
 
-        self.bn5 = nn.BatchNorm2d(args.num_channels)
-        self.bn6 = nn.BatchNorm2d(args.num_channels)
-        self.bn7 = nn.BatchNorm2d(args.num_channels)
+        self.bn5 = nn.BatchNorm2d(self.args.num_channels)
+        self.bn6 = nn.BatchNorm2d(self.args.num_channels)
+        self.bn7 = nn.BatchNorm2d(self.args.num_channels)
 
         # print(self.args.num_channels * (self.boards[0] - 4) * (self.boards[1] - 4), self.args.num_channels * (self.walls[0] - 2) * (self.walls[1] - 2))
-        size = self.args.num_channels * (self.boards[0] - 4) * (self.boards[1] - 4)+ self.args.num_channels * (self.walls[0] - 2) * (self.walls[1] - 2) + self.values
+        size = self.args.num_channels * (self.boards[0] - 4) * (self.boards[1] - 4) + self.args.num_channels * (
+                    self.walls[0] - 2) * (self.walls[1] - 2) + self.values
         # print(size)
         self.fc1 = nn.Linear(size, 1024)
         self.fc_bn1 = nn.BatchNorm1d(1024)
