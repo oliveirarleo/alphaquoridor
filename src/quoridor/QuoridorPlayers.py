@@ -18,29 +18,35 @@ class RandomPlayer:
 class HumanQuoridorPlayer:
     def __init__(self, game):
         self.game = game
+        self.pawn_action_translator = ['N', 'S', 'E', 'W', 'JN', 'JS', 'JE', 'JW', 'JNE', 'JSW', 'JNW', 'JSE', ]
 
     def play(self, board):
-        # display(board)
+        board.plot(save=False)
         valid = self.game.getValidActions(board, 1)
-        for i in range(len(valid)):
-            if valid[i]:
-                print("[", int(i / self.game.n), int(i % self.game.n), end="] ")
+        num_walls = self.game.n - 1
+
         while True:
-            input_move = input()
-            input_a = input_move.split(" ")
-            if len(input_a) == 2:
-                try:
-                    x, y = [int(i) for i in input_a]
-                    if ((0 <= x) and (x < self.game.n) and (0 <= y) and (y < self.game.n)) or \
-                            ((x == self.game.n) and (y == 0)):
-                        a = self.game.n * x + y if x != -1 else self.game.n ** 2
-                        if valid[a]:
-                            break
-                except ValueError:
-                    # Input needs to be an integer
-                    'Invalid integer'
-            print('Invalid move')
-        return a
+            input_move = input().upper()
+            try:
+                if input_move in self.pawn_action_translator:
+                    action = self.pawn_action_translator.index(input_move)
+                    return action
+                elif input_move.startswith('VW'):
+                    input_list = input_move.split(" ")
+                    action = 12 + int(input_list[1]) * num_walls + int(input_list[2])
+                    if valid[action] == 1:
+                        return action
+                    raise Exception
+                elif input_move.startswith('HW'):
+                    input_list = input_move.split(" ")
+                    action = 12 + num_walls ** 2 + int(input_list[1]) * num_walls + int(input_list[2])
+                    if valid[action] == 1:
+                        return action
+                    raise Exception
+                else:
+                    raise Exception
+            except:
+                print('INVALID MOVE!', input_move)
 
 
 class GreedyQuoridorPlayer:
@@ -48,16 +54,9 @@ class GreedyQuoridorPlayer:
         self.game = game
 
     def play(self, board):
-        valids = self.game.getValidActions(board, 1)
-        candidates = []
-        for a in range(self.game.getActionSize()):
-            if valids[a] == 0:
-                continue
-            nextBoard, _ = self.game.getNextState(board, 1, a)
-            score = self.game.getScore(nextBoard, 1)
-            candidates += [(-score, a)]
-        candidates.sort()
-        return candidates[0][1]
+        ac = board.shortestPathActions()
+        greedy_actions = np.argwhere(ac == np.amax(ac))
+        return greedy_actions[0][0]
 
 
 class AlphaQuoridor:

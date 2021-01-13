@@ -253,7 +253,7 @@ class QuoridorBoard:
 
         actions = pawn_actions + wall_actions
         if sum(actions) == 0:
-            self.plot_board(save=False)
+            self.plot(save=False)
         return actions
 
     def executeAction(self, player, action):
@@ -309,7 +309,7 @@ class QuoridorBoard:
 
         self.h_walls[x, y] = 1
 
-    def plot_board(self, path=None, name=None, save=True, print_lw=True, print_pm=False):
+    def plot(self, path=None, name=None, save=True, print_lw=True, print_pm=False):
         if path is None:
             path = []
         if name is None:

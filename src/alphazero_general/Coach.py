@@ -4,15 +4,12 @@ import sys
 from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
-import multiprocessing as mp
 import numpy as np
 from tqdm import tqdm
-from tqdm.contrib.concurrent import process_map
 from alphazero_general.Arena import Arena
 from alphazero_general.MCTSQuoridor import MCTS
 
 log = logging.getLogger(__name__)
-from multiprocessing import Pool
 
 
 class Coach:

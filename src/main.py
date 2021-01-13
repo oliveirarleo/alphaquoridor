@@ -13,19 +13,19 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 1000,
+    'numIters': 30,
     'numEps': 600,  # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,  #
     'updateThreshold': 0.60,
     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
     'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-    'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
+    'numMCTSSims': 500,  # Number of games moves for MCTS to simulate.
     'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
     'cpuct': 2.5,
     'cpuct_base': 19652,
     'cpuct_mult': 2,
 
-    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/100epsT2',
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/600eps500simsT2',
     'load_model': False,
     'load_examples': False,
     'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/', 'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),

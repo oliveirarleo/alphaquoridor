@@ -120,4 +120,4 @@ class QuoridorGame(Game):
         return board.getBoardHashable()
 
     def display(self, board, name=None):
-        board.plot_board(name=name)
+        board.plot(name=name)

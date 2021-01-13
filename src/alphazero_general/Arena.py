@@ -57,8 +57,8 @@ class Arena:
                 log.info(f'player = {curPlayer}')
                 log.info(f'red_walls = {board.red_walls}')
                 log.info(f'blue_walls = {board.blue_walls}')
-                board.plot_board(save=False)
-                c.plot_board(save=False)
+                board.plot(save=False)
+                c.plot(save=False)
 
                 assert valids[action] > 0
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
@@ -93,7 +93,7 @@ class Arena:
                 twoWon += 1
             else:
                 draws += 1
-            progress_bar.set_description(f'Arena.playGames (1): {oneWon} / {twoWon} ; DRAWS : {draws}')
+            progress_bar.set_description(f'Arena.playGames (1): {oneWon} / {twoWon} : {draws}')
 
         self.player1, self.player2 = self.player2, self.player1
 
@@ -107,6 +107,6 @@ class Arena:
             else:
                 draws += 1
 
-            progress_bar.set_description(f'Arena.playGames (2): {oneWon} / {twoWon} ; DRAWS : {draws}')
+            progress_bar.set_description(f'Arena.playGames (2): {oneWon} / {twoWon} : {draws}')
 
         return oneWon, twoWon, draws

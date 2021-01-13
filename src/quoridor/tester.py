@@ -97,7 +97,7 @@ def play_games(n=5,
 def simulate_search():
     game = Game(5)
     board = game.getInitBoard()
-    board.plot_board(save=False)
+    board.plot(save=False)
 
     game_ended = game.getGameEnded(board, 1)
     it = 0
@@ -108,7 +108,7 @@ def simulate_search():
         next_s, next_player = game.getNextState(board, 1, action)
         board = game.getCanonicalForm(next_s, next_player)
         game_ended = game.getGameEnded(board, 1)
-        board.plot_board(invert_yaxis=(it % 2 == 0))
+        board.plot(invert_yaxis=(it % 2 == 0))
 
 
 def get_wall_action(n, x, y, is_vertical):
@@ -124,18 +124,18 @@ def test_moves():
     n = 5
     game = Game(n)
     board = game.getInitBoard()
-    board.plot_board(save=False)
+    board.plot(save=False)
 
     player = -1
 
     print(player, game.getValidActions(board, player))
     board, player = game.getNextState(board, player, 10)
-    board.plot_board(save=False)
+    board.plot(save=False)
 
     wall = get_wall_action(n=n, x=3, y=2, is_vertical=True)
     print(player, game.getValidActions(board, player))
     board, player = game.getNextState(board, player, wall)
-    board.plot_board(save=False)
+    board.plot(save=False)
 
     print(player, game.getValidActions(board, player))
 
@@ -153,7 +153,7 @@ def place_wall_and_print(game, board, x, y, isv=True):
     # print('len', length)
     # print(board.v_walls)
     # print(board.h_walls)
-    board.plot_board(path=path, save=False)
+    board.plot(path=path, save=False)
     return board
 
 
@@ -194,7 +194,7 @@ def play_random_moves(n_random_moves):
         # print(action_tostring(action, n))
         board, player = game.getNextState(board, 1, action)
         board = game.getCanonicalForm(board, player)
-        board.plot_board(save=False, print_pm=True)
+        board.plot(save=False, print_pm=True)
 
 
 def train(n=5):
@@ -260,7 +260,7 @@ def place_some_walls():
 
     board, player = game.getNextState(board, 1, 2)
     board, player = game.getNextState(board, 1, 2)
-    board.plot_board(save=False)
+    board.plot(save=False)
 
 
 def main():
