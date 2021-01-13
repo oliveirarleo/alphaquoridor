@@ -84,7 +84,8 @@ class Arena:
         oneWon = 0
         twoWon = 0
         draws = 0
-        for i in tqdm(range(num), desc="Arena.playGames (1)"):
+        progress_bar = tqdm(range(num), desc="Arena.playGames (1)")
+        for i in progress_bar:
             gameResult = self.playGame(verbose=verbose, name='game_'+str(i))
             if gameResult == 1:
                 oneWon += 1
@@ -92,11 +93,12 @@ class Arena:
                 twoWon += 1
             else:
                 draws += 1
-        log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (twoWon, oneWon, draws))
+            progress_bar.set_description(f'Arena.playGames (1): {oneWon} / {twoWon} ; DRAWS : {draws}')
 
         self.player1, self.player2 = self.player2, self.player1
 
-        for i in tqdm(range(num), desc="Arena.playGames (2)"):
+        progress_bar = tqdm(range(num), desc="Arena.playGames (2)")
+        for i in progress_bar:
             gameResult = self.playGame(verbose=verbose, name='game_'+str(i+num))
             if gameResult == -1:
                 oneWon += 1
@@ -104,5 +106,7 @@ class Arena:
                 twoWon += 1
             else:
                 draws += 1
+
+            progress_bar.set_description(f'Arena.playGames (2): {oneWon} / {twoWon} ; DRAWS : {draws}')
 
         return oneWon, twoWon, draws

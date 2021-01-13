@@ -216,16 +216,16 @@ PYBIND11_PYTHON_VERSION:STRING=
 PYTHON_EXECUTABLE:FILEPATH=/home/leleco/proj/pfg/alphaquoridor/venv/bin/python
 
 //Path to a library.
-PYTHON_LIBRARY:FILEPATH=/usr/lib/libpython3.8.so
+PYTHON_LIBRARY:FILEPATH=/usr/lib/libpython3.9.so
 
 //The directory containing a CMake configuration file for pybind11.
 pybind11_DIR:PATH=/usr/share/cmake/pybind11
 
 //Value Computed by CMake
-qutils_BINARY_DIR:STATIC=/home/leleco/proj/pfg/alphaquoridor/src/quoridorV3/pathfind/build
+qutils_BINARY_DIR:STATIC=/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/build
 
 //Value Computed by CMake
-qutils_SOURCE_DIR:STATIC=/home/leleco/proj/pfg/alphaquoridor/src/quoridorV3/pathfind
+qutils_SOURCE_DIR:STATIC=/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind
 
 
 ########################
@@ -237,13 +237,13 @@ CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
 //This is the directory where this CMakeCache.txt was created
-CMAKE_CACHEFILE_DIR:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/src/quoridorV3/pathfind/build
+CMAKE_CACHEFILE_DIR:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind/build
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 //Minor version of cmake used to create the current loaded cache
 CMAKE_CACHE_MINOR_VERSION:INTERNAL=19
 //Patch version of cmake used to create the current loaded cache
-CMAKE_CACHE_PATCH_VERSION:INTERNAL=1
+CMAKE_CACHE_PATCH_VERSION:INTERNAL=2
 //ADVANCED property for variable: CMAKE_COLOR_MAKEFILE
 CMAKE_COLOR_MAKEFILE-ADVANCED:INTERNAL=1
 //Path to CMake executable.
@@ -314,7 +314,7 @@ CMAKE_GENERATOR_PLATFORM:INTERNAL=
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
 //Source directory with the top level CMakeLists.txt file for this
 // project
-CMAKE_HOME_DIRECTORY:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/src/quoridorV3/pathfind
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/src/quoridor/pathfind
 //Install .so files without execute permission.
 CMAKE_INSTALL_SO_NO_EXE:INTERNAL=0
 //ADVANCED property for variable: CMAKE_LINKER
@@ -378,23 +378,25 @@ CMAKE_UNAME:INTERNAL=/usr/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 //Details about finding PYTHON
-FIND_PACKAGE_MESSAGE_DETAILS_PYTHON:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/venv/bin/python3.8.6
+FIND_PACKAGE_MESSAGE_DETAILS_PYTHON:INTERNAL=/home/leleco/proj/pfg/alphaquoridor/venv/bin/python3.9.1
 //Details about finding PythonInterp
-FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/home/leleco/proj/pfg/alphaquoridor/venv/bin/python][v3.8.6()]
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/home/leleco/proj/pfg/alphaquoridor/venv/bin/python][v3.9.1()]
 //Test HAS_FLTO
 HAS_FLTO:INTERNAL=1
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
-PYTHON_INCLUDE_DIRS:INTERNAL=/usr/include/python3.8
+PYTHON_INCLUDE_DIRS:INTERNAL=/usr/include/python3.9
 PYTHON_IS_DEBUG:INTERNAL=0
-PYTHON_LIBRARIES:INTERNAL=/usr/lib/libpython3.8.so
+PYTHON_LIBRARIES:INTERNAL=/usr/lib/libpython3.9.so
 //ADVANCED property for variable: PYTHON_LIBRARY
 PYTHON_LIBRARY-ADVANCED:INTERNAL=1
-PYTHON_MODULE_EXTENSION:INTERNAL=.cpython-38-x86_64-linux-gnu.so
+PYTHON_MODULE_EXTENSION:INTERNAL=.cpython-39-x86_64-linux-gnu.so
 PYTHON_MODULE_PREFIX:INTERNAL=
-PYTHON_VERSION:INTERNAL=3.8.6
+PYTHON_VERSION:INTERNAL=3.9.1
 PYTHON_VERSION_MAJOR:INTERNAL=3
-PYTHON_VERSION_MINOR:INTERNAL=8
+PYTHON_VERSION_MINOR:INTERNAL=9
 Python_ADDITIONAL_VERSIONS:INTERNAL=3.9;3.8;3.7;3.6;3.5;3.4
 _Python:INTERNAL=PYTHON
+//Directories where pybind11 and possibly Python headers are located
+pybind11_INCLUDE_DIRS:INTERNAL=/usr/include;/usr/include/python3.9
 

@@ -84,12 +84,22 @@ class QuoridorBoard:
                     (0, 1)).ravel())
 
     def getGameEnded(self, player):
+        # endgame_heuristic = True
+        # if endgame_heuristic:
+        #     dist_red = self.paths_red[self.red_position[0]][self.red_position[1]]
+        #     dist_blue = self.paths_blue[self.blue_position[0]][self.blue_position[1]]
+        #
+        #     if player == 1 and self.red_walls == 0 and self.blue_walls == 0 and dist_red < dist_blue:
+        #         return player
+        #     if player == -1 and self.red_walls == 0 and self.blue_walls == 0 and dist_blue < dist_red:
+        #         return -player
+
         if self.red_position[1] == self.red_goal:
             return player
         elif self.blue_position[1] == self.blue_goal:
             return -player
         elif self.draw:
-            return 1e-4
+            return -1e-3
         return 0
 
     def addToHistory(self):
@@ -123,9 +133,9 @@ class QuoridorBoard:
         values = np.append(self.shortestPathActions(),
                            [self.red_walls / self.max_walls, self.blue_walls / self.max_walls,
                             ((self.n ** 2 + 1) - self.paths_red[self.red_position[0]][self.red_position[1]]) / (
-                                        self.n ** 2 + 1),
+                                    self.n ** 2 + 1),
                             ((self.n ** 2 + 1) - self.paths_blue[self.blue_position[0]][self.blue_position[1]]) / (
-                                        self.n ** 2 + 1),
+                                    self.n ** 2 + 1),
                             float(self.draw)])
         return boards, walls, values
 
@@ -226,6 +236,8 @@ class QuoridorBoard:
             pawn_actions = QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
                                                         self.blue_position[0], self.blue_position[1],
                                                         self.v_walls, self.h_walls)
+
+            # pawn_actions = 12 * [0]
             if self.red_walls > 0:
                 wall_actions = list(np.concatenate((self.legal_vwalls.flatten(), self.legal_hwalls.flatten())))
             else:

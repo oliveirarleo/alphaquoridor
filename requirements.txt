@@ -3,6 +3,5 @@ coloredlogs
 tqdm
 torch
 torchvision
-tensorflow
 matplotlib
 pybind11

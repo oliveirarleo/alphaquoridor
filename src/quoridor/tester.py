@@ -7,7 +7,7 @@ sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
 
 from alphazero_general.Arena import Arena
-from quoridor.QuoridorPlayers import RandomPlayer
+from quoridor.QuoridorPlayers import RandomPlayer, HumanQuoridorPlayer
 from utils import dotdict
 
 from alphazero_general.MCTSQuoridor import MCTS
@@ -23,7 +23,7 @@ def play_games(n=5,
                p1='quoridor_n5_v3_nnet_v2_torch_best.pth.tar',
                p2='quoridor_n5_v3_nnet_v2_torch_best.pth.tar',
                folder='/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/',
-               num_games=4, numMCTSSims=100):
+               num_games=4, numMCTSSims=1000):
     args = dotdict({
         'numIters': 1000,
         'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
@@ -63,6 +63,36 @@ def play_games(n=5,
 
     log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
 
+
+# def human():
+#     g = Game(5)
+#
+#     # all players
+#     # rp = RandomPlayer(g).play
+#     # gp = GreedyQuoridorPlayer(g).play
+#     hp = HumanQuoridorPlayer(g).play
+#
+#     # nnet players
+#     n1 = nn(g)
+#     n1.load_checkpoint('./pretrained_models/othello/pytorch/', '6x100x25_best.pth.tar')
+#     args1 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
+#     mcts1 = MCTS(g, n1, args1)
+#     n1p = lambda x: np.argmax(mcts1.getActionProb(x, temp=0))
+#
+#     if human_vs_cpu:
+#         player2 = hp
+#     else:
+#         n2 = nn(g)
+#         n2.load_checkpoint('./pretrained_models/othello/pytorch/', '8x8_100checkpoints_best.pth.tar')
+#         args2 = dotdict({'numMCTSSims': 50, 'cpuct': 1.0})
+#         mcts2 = MCTS(g, n2, args2)
+#         n2p = lambda x: np.argmax(mcts2.getActionProb(x, temp=0))
+#
+#         player2 = n2p  # Player 2 is neural network if it's cpu vs cpu.
+#
+#     arena =  Arena(n1p, player2, g, display=Game.display)
+#
+#     print(arena.playGames(2, verbose=True))
 
 def simulate_search():
     game = Game(5)
@@ -238,7 +268,7 @@ def main():
     # place_some_walls()
     # train(9)
 
-    play_games()
+    play_games(num_games=20)
 
 
 if __name__ == "__main__":

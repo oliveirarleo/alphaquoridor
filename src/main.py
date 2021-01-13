@@ -14,7 +14,7 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'numIters': 1000,
-    'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
+    'numEps': 600,  # Number of complete self-play games to simulate during a new iteration.
     'tempThreshold': 15,  #
     'updateThreshold': 0.60,
     # During arena playoff, new neural net will be accepted if threshold or more of games are won.
@@ -25,7 +25,7 @@ args = dotdict({
     'cpuct_base': 19652,
     'cpuct_mult': 2,
 
-    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v2/',
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/100epsT2',
     'load_model': False,
     'load_examples': False,
     'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/', 'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),
@@ -36,7 +36,7 @@ args = dotdict({
 
 def main():
     log.info('Loading %s...', Game.__name__)
-    g = Game(9)
+    g = Game(5)
 
     log.info('Loading %s...', nn.__name__)
     nnet = nn(g)

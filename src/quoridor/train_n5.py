@@ -67,24 +67,24 @@ def play_games(n=5,
 
 def train(n=5):
     args = dotdict({
-        'numIters': 1000,
-        'numEps': 200,  # Number of complete self-play games to simulate during a new iteration.
-        'tempThreshold': 15,  #
+        'numIters': 100,
+        'numEps': 600,  # Number of complete self-play games to simulate during a new iteration.
+        'tempThreshold': 6,  #
         'updateThreshold': 0.60,
         # During arena playoff, new neural net will be accepted if threshold or more of games are won.
         'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-        'numMCTSSims': 500,  # Number of games moves for MCTS to simulate.
+        'numMCTSSims': 100,  # Number of games moves for MCTS to simulate.
         'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
         'cpuct': 2.5,
         'cpuct_base': 19652,
         'cpuct_mult': 2,
 
-        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/',
-        'load_model': True,
+        'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/100s5niftehnegdraw',
+        'load_model': False,
         'load_examples': True,
-        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/',
-                             'quoridor_n5_v3_nnet_v2_torch_checkpoint.pth.tar'),
-        'numItersForTrainExamplesHistory': 20,
+        'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/100s5niftehnegdraw/',
+                             'quoridor_n5_v3_nnet_v2_torch_checkpoint_1.pth.tar'),
+        'numItersForTrainExamplesHistory': 15,
     })
     nn_args = dotdict({
         'lr': 0.001,

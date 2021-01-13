@@ -12,7 +12,7 @@ use this script to play any two agents against each other, or play manually with
 any agent.
 """
 
-mini_othello = False  # Play in 6x6 instead of the normal 8x8.
+mini_othello = True  # Play in 6x6 instead of the normal 8x8.
 human_vs_cpu = True
 
 if mini_othello:
