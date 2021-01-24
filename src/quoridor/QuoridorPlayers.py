@@ -1,7 +1,7 @@
 import numpy as np
 
 from alphazero_general.MCTS import MCTS
-from utils import dotdict
+from alphazero_general.utils import dotdict
 from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.pytorchv2.NNet import NNetWrapper as nnv2
 

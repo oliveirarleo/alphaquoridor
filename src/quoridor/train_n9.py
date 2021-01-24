@@ -8,14 +8,12 @@ from alphazero_general.Coach import Coach
 
 import torch
 from alphazero_general.Arena import Arena
-from quoridor.QuoridorPlayers import RandomPlayer
-from utils import dotdict
+from alphazero_general.utils import dotdict
 
 from alphazero_general.MCTSQuoridor import MCTS
 
 from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.QuoridorGame import QuoridorGame as Game
-import QuoridorUtils
 
 log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.

@@ -1,12 +1,11 @@
 import os
 import sys
-import time
 
 import numpy as np
 from tqdm import tqdm
 
 sys.path.append('../../')
-from utils import *
+from alphazero_general.utils import *
 from alphazero_general.NeuralNet import NeuralNet
 
 import torch

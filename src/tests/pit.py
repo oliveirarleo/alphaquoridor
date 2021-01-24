@@ -1,14 +1,10 @@
 from functools import partial
 
-from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQuoridorPlayer, AlphaQuoridorV2, \
-    AlphaQuoridor
+from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQuoridorPlayer, AlphaQuoridor
 from src.alphazero_general import Arena
-from src.alphazero_general.MCTS import MCTS
 from quoridor.QuoridorGame import QuoridorGame as Game
-from quoridor.pytorch.NNet import NNetWrapper as NNet
 
-import numpy as np
-from utils import *
+from alphazero_general.utils import *
 
 """
 use this script to play any two agents against each other, or play manually with

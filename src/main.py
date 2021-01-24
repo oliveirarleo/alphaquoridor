@@ -6,7 +6,7 @@ sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
 from quoridor.pytorch.NNet import NNetWrapper as nn
 from quoridor.QuoridorGame import QuoridorGame as Game
-from utils import *
+from alphazero_general.utils import *
 
 log = logging.getLogger(__name__)
 

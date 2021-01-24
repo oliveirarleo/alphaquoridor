@@ -5,7 +5,7 @@ from quoridor.QuoridorGame import QuoridorGame
 from quoridor.pytorch.NNet import NNetWrapper as NNet
 
 import numpy as np
-from utils import *
+from alphazero_general.utils import *
 
 """
 use this script to play any two agents against each other, or play manually with

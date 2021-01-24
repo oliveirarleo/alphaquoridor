@@ -7,8 +7,8 @@ sys.path.append('quoridor/pathfind/build')
 from alphazero_general.Coach import Coach
 
 from alphazero_general.Arena import Arena
-from quoridor.QuoridorPlayers import RandomPlayer, HumanQuoridorPlayer
-from utils import dotdict
+from quoridor.QuoridorPlayers import RandomPlayer
+from alphazero_general.utils import dotdict
 
 from alphazero_general.MCTSQuoridor import MCTS
 
