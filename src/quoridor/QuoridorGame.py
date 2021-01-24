@@ -1,6 +1,7 @@
 import sys
 import os
 
+import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 
@@ -16,7 +17,7 @@ class QuoridorGame(Game):
         self.board_len = 2 * self.n - 1
 
     def __str__(self):
-        return 'quoridor_n'+str(self.n)+'_v3'
+        return 'quoridor_n' + str(self.n) + '_v3'
 
     def getInitBoard(self):
         """
@@ -35,7 +36,7 @@ class QuoridorGame(Game):
         return self.action_size
 
     def getBoardSize(self):
-        return (self.n, self.n, 2), (self.n-1, self.n-1, 2), 17
+        return (self.n, self.n, 2), (self.n - 1, self.n - 1, 2), 17
 
     def getNextState(self, board, player, action):
         """
@@ -106,7 +107,17 @@ class QuoridorGame(Game):
                        form of the board and the corresponding pi vector. This
                        is used when training the neural network from examples.
         """
-        return [(board.getBoard(), pi)]
+        pawn_moves = 12
+        vwa_size = pawn_moves + (self.n - 1) ** 2
+        vw_actions = list(np.flipud(np.array(pi[pawn_moves:vwa_size]).reshape(self.n - 1, self.n - 1)).flatten())
+        hw_actions = list(np.flipud(np.array(pi[vwa_size:]).reshape(self.n - 1, self.n - 1)).flatten())
+        pi2 = pi[:12] + vw_actions + hw_actions
+
+        pi2[2], pi2[3] = pi2[3], pi2[2]
+        pi2[6], pi2[7] = pi2[7], pi2[6]
+        pi2[8], pi2[10] = pi2[10], pi2[8]
+        pi2[9], pi2[11] = pi2[9], pi2[11]
+        return [(board.getBoard(), pi), (board.getBoardFlippedHorizontally(), pi2)]
 
     def stringRepresentation(self, board):
         """
@@ -119,5 +130,5 @@ class QuoridorGame(Game):
         """
         return board.getBoardHashable()
 
-    def display(self, board, name=None):
-        board.plot(name=name)
+    def display(self, board, name=None, save_folder=None):
+        board.plot(name=name, save_folder=save_folder)

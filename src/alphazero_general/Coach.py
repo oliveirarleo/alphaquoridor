@@ -7,7 +7,7 @@ from random import shuffle
 import numpy as np
 from tqdm import tqdm
 from alphazero_general.Arena import Arena
-from alphazero_general.MCTSQuoridor import MCTS
+from alphazero_general.MCTS import MCTS
 
 log = logging.getLogger(__name__)
 
@@ -126,8 +126,8 @@ class Coach:
             nmcts = MCTS(self.game, self.nnet, self.args)
 
             log.info('PITTING AGAINST PREVIOUS VERSION')
-            arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=1)),
-                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=1)),
+            arena = Arena(lambda x: np.random.choice(self.game.getActionSize(), p=pmcts.getActionProb(x, temp=0)),
+                          lambda x: np.random.choice(self.game.getActionSize(), p=nmcts.getActionProb(x, temp=0)),
                           self.game)
             # arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
             #               lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
@@ -170,4 +170,4 @@ class Coach:
             log.info('Loading done!')
 
             # examples based on the model were already collected (loaded)
-            self.skipFirstSelfPlay = True
+            self.skipFirstSelfPlay = False

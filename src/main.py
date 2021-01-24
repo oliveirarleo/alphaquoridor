@@ -13,22 +13,25 @@ log = logging.getLogger(__name__)
 coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
-    'numIters': 30,
-    'numEps': 600,  # Number of complete self-play games to simulate during a new iteration.
-    'tempThreshold': 15,  #
+    'numIters': 80,
+    'numEps': 1600,
+    'tempThreshold': 8,
     'updateThreshold': 0.60,
-    # During arena playoff, new neural net will be accepted if threshold or more of games are won.
-    'maxlenOfQueue': 200000,  # Number of game examples to train the neural networks.
-    'numMCTSSims': 500,  # Number of games moves for MCTS to simulate.
-    'arenaCompare': 40,  # Number of games to play during arena play to determine if new net will be accepted.
-    'cpuct': 2.5,
+    'maxlenOfQueue': 200000,
+    'numMCTSSims': 100,
+    'arenaCompare': 40,
+    'cpuct': 4,
     'cpuct_base': 19652,
     'cpuct_mult': 2,
+    'dirichlet_alpha': 0.3,
+    'eps': 0.25,
 
-    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v3/600eps500simsT2',
-    'load_model': False,
-    'load_examples': False,
-    'load_folder_file': ('/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v1/cpuct_new/', 'quoridor_n5_v1_nnetv0_torch_checkpoint.pth.tar'),
+    # 'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v5/test',
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5v5/1600x100',
+    'load_model': True,
+    'load_examples': True,
+    'load_folder_file': (
+    '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5v5/1600x100', 'quoridor_n5_v3_nnet_v2_torch_best.pth.tar'),
     'numItersForTrainExamplesHistory': 20,
 
 })

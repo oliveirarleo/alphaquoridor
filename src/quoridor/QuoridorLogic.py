@@ -139,6 +139,38 @@ class QuoridorBoard:
                             float(self.draw)])
         return boards, walls, values
 
+    def getBoardFlippedHorizontally(self):
+        # Boards
+        boards = np.zeros((2, self.n, self.n), dtype=int)
+        # Red position
+        red_board = np.zeros((self.n, self.n))
+        red_board[(self.n - 1) - self.red_position[0], self.red_position[1]] = 1
+        boards[0] = red_board
+        # Blue position
+        blue_board = np.zeros((self.n, self.n))
+        blue_board[(self.n - 1) - self.blue_position[0], self.blue_position[1]] = 1
+        boards[1] = blue_board
+
+        # Walls
+        walls = np.zeros((2, self.n - 1, self.n - 1), dtype=int)
+        walls[0] = np.flipud(self.v_walls)
+        walls[1] = np.flipud(self.h_walls)
+
+        # Values
+        spa = self.shortestPathActions()
+        spa[2], spa[3] = spa[3], spa[2]
+        spa[6], spa[7] = spa[7], spa[6]
+        spa[8], spa[10] = spa[10], spa[8]
+        spa[9], spa[11] = spa[9], spa[11]
+        values = np.append(spa,
+                           [self.red_walls / self.max_walls, self.blue_walls / self.max_walls,
+                            ((self.n ** 2 + 1) - self.paths_red[(self.n - 1) - self.red_position[0]][
+                                self.red_position[1]]) / (self.n ** 2 + 1),
+                            ((self.n ** 2 + 1) - self.paths_blue[(self.n - 1) - self.blue_position[0]][
+                                self.blue_position[1]]) / (self.n ** 2 + 1),
+                            float(self.draw)])
+        return boards, walls, values
+
     def shortestPathActions(self):
 
         pawn_actions = QuoridorUtils.getPawnActions(self.red_position[0], self.red_position[1],
@@ -309,7 +341,7 @@ class QuoridorBoard:
 
         self.h_walls[x, y] = 1
 
-    def plot(self, path=None, name=None, save=True, print_lw=True, print_pm=False):
+    def plot(self, path=None, name=None, save=True, print_lw=True, print_pm=False, save_folder=None):
         if path is None:
             path = []
         if name is None:
@@ -408,9 +440,12 @@ class QuoridorBoard:
             ax_map.invert_xaxis()
 
         if save:
-            if not os.path.exists('./games'):
-                os.makedirs('./games')
-            plt.savefig('./games/' + name)
+            folder = './games'
+            if save_folder is not None:
+                folder = os.path.join(folder, save_folder)
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            plt.savefig(folder + '/' + name)
         else:
             plt.show()
         plt.close(fig_map)

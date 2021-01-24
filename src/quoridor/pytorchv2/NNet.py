@@ -12,16 +12,17 @@ from alphazero_general.NeuralNet import NeuralNet
 import torch
 import torch.optim as optim
 
-from .QuoridorNNet import QuoridorNNet as qnnet
+from .QuoridorBigNNet import QuoridorNNet as qnnet
 
 args = dotdict({
     'lr': 0.001,
     'dropout': 0.3,
-    'epochs': 7,
-    'batch_size': 512,
+    'epochs': 10,
+    'batch_size': 128,
     'cuda': torch.cuda.is_available(),
-    'num_channels': 512,
+    'num_channels': 256,
 })
+
 
 class NNetWrapper(NeuralNet):
     def __init__(self, game, nn_args=None):

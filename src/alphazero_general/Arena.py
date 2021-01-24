@@ -64,7 +64,7 @@ class Arena:
             board, curPlayer = self.game.getNextState(board, curPlayer, action)
         if verbose:
             assert self.display
-            print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
+            # print("Game over: Turn ", str(it), "Result ", str(self.game.getGameEnded(board, 1)))
             self.display(board, name+'_over')
         # print(it, curPlayer * self.game.getGameEnded(board, curPlayer))
         return curPlayer * self.game.getGameEnded(board, curPlayer)

@@ -3,6 +3,7 @@ import numpy as np
 from alphazero_general.MCTS import MCTS
 from utils import dotdict
 from quoridor.pytorch.NNet import NNetWrapper as nn
+from quoridor.pytorchv2.NNet import NNetWrapper as nnv2
 
 
 class RandomPlayer:
@@ -31,13 +32,13 @@ class HumanQuoridorPlayer:
                 if input_move in self.pawn_action_translator:
                     action = self.pawn_action_translator.index(input_move)
                     return action
-                elif input_move.startswith('VW'):
+                elif input_move.startswith('V'):
                     input_list = input_move.split(" ")
                     action = 12 + int(input_list[1]) * num_walls + int(input_list[2])
                     if valid[action] == 1:
                         return action
                     raise Exception
-                elif input_move.startswith('HW'):
+                elif input_move.startswith('H'):
                     input_list = input_move.split(" ")
                     action = 12 + num_walls ** 2 + int(input_list[1]) * num_walls + int(input_list[2])
                     if valid[action] == 1:
@@ -69,7 +70,6 @@ class AlphaQuoridor:
                 'updateThreshold': 0.60,
                 'maxlenOfQueue': 200000,
                 'numMCTSSims': 1000,
-                'arenaCompare': 40,
                 'cpuct': 2.5,
                 'cpuct_base': 19652,
                 'cpuct_mult': 2,
@@ -78,6 +78,33 @@ class AlphaQuoridor:
             self.args = args
 
         nnet = nn(self.game)
+        nnet.load_checkpoint(folder=nn_folder, filename=nn_name)
+        self.nmcts = MCTS(self.game, nnet, args)
+        self.temp = temp
+
+    def play(self, board):
+        return np.random.choice(self.game.getActionSize(), p=self.nmcts.getActionProb(board, temp=self.temp))
+
+
+class AlphaQuoridorV2:
+    def __init__(self, game, nn_folder, nn_name, args=None, temp=0):
+
+        self.game = game
+        if args is None:
+            self.args = dotdict({
+                'tempThreshold': 15,
+                'updateThreshold': 0.60,
+                'maxlenOfQueue': 200000,
+                'numMCTSSims': 1000,
+                'arenaCompare': 40,
+                'cpuct': 2.5,
+                'cpuct_base': 19652,
+                'cpuct_mult': 2,
+            })
+        else:
+            self.args = args
+
+        nnet = nnv2(self.game)
         nnet.load_checkpoint(folder=nn_folder, filename=nn_name)
         self.nmcts = MCTS(self.game, nnet, args)
         self.temp = temp

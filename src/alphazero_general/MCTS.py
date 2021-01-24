@@ -50,15 +50,6 @@ class MCTS:
         counts_sum = float(sum(counts))
         probs = [x / counts_sum for x in counts]
 
-        # valds = self.game.getValidActions(canonicalBoard, 1)
-        # for i, b in enumerate(valds):
-        #     if b == 0 and probs[i] > 0:
-        #         canonicalBoard.plot_board(save=False)
-        #         print(valds)
-        #         print(b)
-        # if sum(probs[:12]) == 0:
-        #     print(probs)
-        #     canonicalBoard.plot_board(save=False)
         return probs
 
     def search(self, canonicalBoard):
@@ -95,6 +86,7 @@ class MCTS:
             valids = self.game.getValidActions(canonicalBoard, 1)
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
+
             if sum_Ps_s > 0:
                 self.Ps[s] /= sum_Ps_s  # renormalize
             else:
@@ -105,6 +97,13 @@ class MCTS:
                 log.error("All valid moves were masked, doing a workaround.")
                 self.Ps[s] = self.Ps[s] + valids
                 self.Ps[s] /= np.sum(self.Ps[s])
+
+            noise = np.random.dirichlet(self.args.dirichlet_alpha * np.ones(np.count_nonzero(valids)))
+            j = 0
+            for i, p in enumerate(self.Ps[s]):
+                if valids[i] > 0:
+                    self.Ps[s][i] = (1 - self.args.eps) * p + self.args.eps * noise[j]
+                    j += 1
 
             self.Vs[s] = valids
             self.Ns[s] = 0
@@ -119,7 +118,8 @@ class MCTS:
                 if (s, a) in self.Qsa:
                     cpuct = self.args.cpuct_mult * math.log(
                         (1 + self.Ns[s] + self.args.cpuct_base) / self.args.cpuct_base) + self.args.cpuct
-                    u = self.Qsa[(s, a)] + cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (1 + self.Nsa[(s, a)])
+                    u = self.Qsa[(s, a)] + cpuct * self.Ps[s][a] * math.sqrt(self.Ns[s]) / (
+                            1 + self.Nsa[(s, a)])
                 else:
                     cpuct = self.args.cpuct_mult * math.log(
                         (1 + self.Ns[s] + self.args.cpuct_base) / self.args.cpuct_base) + self.args.cpuct
