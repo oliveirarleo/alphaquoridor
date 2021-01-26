@@ -5,7 +5,7 @@ import numpy as np
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'pathfind/build'))
 
-from src.alphazero_general.Game import Game
+from alphazero_general.Game import Game
 from .QuoridorLogic import QuoridorBoard
 
 
@@ -130,5 +130,5 @@ class QuoridorGame(Game):
         """
         return board.getBoardHashable()
 
-    def display(self, board, name=None, save_folder=None):
-        board.plot(name=name, save_folder=save_folder)
+    def display(self, board, name=None, save_folder=None, save=True):
+        board.plot(name=name, save_folder=save_folder, save=save)
