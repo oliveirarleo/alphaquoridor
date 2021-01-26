@@ -20,7 +20,7 @@ args = dotdict({
                 'eps': 0.25,
             })
 
-aq = AlphaQuoridor(g, './models/', 'quoridor_n5v5_nnet_v3_1600_100.pth.tar', args=args, temp=0)
+aq = AlphaQuoridor(g, './git_models/', 'quoridor_n5v5_nnet_v3_1600_100.pth.tar', args=args, temp=0)
 arena = Arena.Arena(aq.play, hp, g, display=partial(g.display))
 
 print(arena.playGames(args.arenaCompare, verbose=True))
