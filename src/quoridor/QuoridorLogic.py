@@ -351,12 +351,12 @@ class QuoridorBoard:
 
         flipped = False and self.is_flipped
 
-        if flipped:
-            color_red_board = 'tab:blue'
-            color_blue_board = 'tab:red'
-        else:
-            color_red_board = 'tab:red'
-            color_blue_board = 'tab:blue'
+        # if flipped:
+        color_red_board = 'tab:blue'
+        color_blue_board = 'tab:red'
+        # else:
+        #     color_red_board = 'tab:red'
+        #     color_blue_board = 'tab:blue'
 
         color2w = 'gray'
         board_len = self.n * 2 - 1
