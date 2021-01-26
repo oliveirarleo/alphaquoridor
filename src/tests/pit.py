@@ -27,6 +27,8 @@ args = dotdict({
                 'cpuct': 2.5,
                 'cpuct_base': 19652,
                 'cpuct_mult': 2,
+                'dirichlet_alpha': 0.3,
+                'eps': 0.25,
             })
 
 # aq = AlphaQuoridor(g, folder, 'quoridor_n5_v3_nnet_v2_1600x50x28.pth.tar', args=args, temp=0)
@@ -37,5 +39,4 @@ args = dotdict({
 aq = AlphaQuoridor(g, folder, 'quoridor_n5_v3_nnet_v2_600x50x100.pth.tar', args=args, temp=0)
 aqv2 = AlphaQuoridor(g, folder, 'quoridor_n5_v3_nnet_v2_600x100x43.pth.tar', args=args, temp=0)
 arena = Arena.Arena(aq.play, aqv2.play, g, display=partial(g.display, save_folder='teste6'))
-print(arena.playGames(args.arenaCompare, verbose=False))
 

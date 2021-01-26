@@ -14,20 +14,20 @@ coloredlogs.install(level='INFO')  # Change this to DEBUG to see more info.
 
 args = dotdict({
     'numIters': 80,
-    'numEps': 1600,
+    'numEps': 800,
     'tempThreshold': 8,
     'updateThreshold': 0.60,
     'maxlenOfQueue': 200000,
-    'numMCTSSims': 100,
+    'numMCTSSims': 300,
     'arenaCompare': 40,
-    'cpuct': 4,
+    'cpuct': 3,
     'cpuct_base': 19652,
     'cpuct_mult': 2,
     'dirichlet_alpha': 0.3,
     'eps': 0.25,
 
     # 'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5_v5/test',
-    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5v5/1600x100',
+    'checkpoint': '/run/media/leleco/4EB5CC9A2FD2A5F9/dev/models/n5v5/1600x300',
     'load_model': True,
     'load_examples': True,
     'load_folder_file': (

@@ -1,24 +1,26 @@
-from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQuoridorPlayer
+from functools import partial
+
+from quoridor.QuoridorPlayers import RandomPlayer, GreedyQuoridorPlayer, HumanQuoridorPlayer, AlphaQuoridor
 from src.alphazero_general import Arena
 from quoridor.QuoridorGame import QuoridorGame as Game
 
-"""
-use this script to play any two agents against each other, or play manually with
-any agent.
-"""
+from alphazero_general.utils import *
 
 g = Game(5)
 
-# all players
-rp = RandomPlayer(g).play
-gp = GreedyQuoridorPlayer(g).play
 hp = HumanQuoridorPlayer(g).play
 
-n1p = gp
+args = dotdict({
+                'numMCTSSims': 200,
+                'arenaCompare': 2,
+                'cpuct': 2.5,
+                'cpuct_base': 19652,
+                'cpuct_mult': 2,
+                'dirichlet_alpha': 0.3,
+                'eps': 0.25,
+            })
 
-n2p = hp
+aq = AlphaQuoridor(g, './models/', 'quoridor_n5v5_nnet_v3_1600_100.pth.tar', args=args, temp=0)
+arena = Arena.Arena(aq.play, hp, g, display=partial(g.display))
 
-
-arena = Arena.Arena(n1p, n2p, g, display=g.display)
-
-print(arena.playGames(10, verbose=True))
+print(arena.playGames(args.arenaCompare, verbose=True))
