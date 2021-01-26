@@ -22,7 +22,7 @@ class HumanQuoridorPlayer:
         self.pawn_action_translator = ['N', 'S', 'E', 'W', 'JN', 'JS', 'JE', 'JW', 'JNE', 'JSW', 'JNW', 'JSE', ]
 
     def play(self, board):
-        board.plot(save=False, )
+        board.plot(save=False)
         valid = self.game.getValidActions(board, 1)
         num_walls = self.game.n - 1
 
